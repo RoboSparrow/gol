@@ -11,7 +11,7 @@ int main()
     int height = 30;
 
     int size = width * height;
-    int *world = malloc(size * sizeof(int));
+    int world[size];
 
     srand (time(NULL));
 
