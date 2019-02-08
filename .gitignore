@@ -1,0 +1,6 @@
+_dev/*
+
+*.o
+
+main
+gol
