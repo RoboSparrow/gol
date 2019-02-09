@@ -3,6 +3,9 @@
 
 #include "gol.h"
 
+void paint_init() {
+}
+
 void paint_cell(int cell, int index, int width, int height) {
     if (cell == GOL_ALIVE) {
         printf("\033[07m  \033[m");

@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "gol.h"
+#include "paint.h"
 
 int main()
 {
@@ -16,6 +17,7 @@ int main()
     srand (time(NULL));
 
     gol_init(world, width, height);
+    paint_init();
     usleep(100000);
 
     while (1){
