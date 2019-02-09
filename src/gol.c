@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #include "gol.h"
+#include "paint.h"
 
 int gol_row(int index, int width) {
     int row;
@@ -90,19 +91,14 @@ void gol_update(int world[], int width, int height) {
 
     int size = width * height;
 
-    printf("\033[H"); // clears the screen in Linux type operating systems
-    printf("%u\n", (unsigned) time(NULL));
+    paint_clear_canvas(width, height);
 
     int out[size];
 
     for (int i = 0; i < size; i++) {
         int cell = gol_update_cell(world, i, width, height);
 
-        if (cell == GOL_ALIVE) {
-            printf("\033[07m  \033[m");
-        } else {
-            printf("  ");
-        }
+        paint_cell(cell, i, width, height);
 
         out[i] = cell;
         if((i + 1) % width == 0) {
