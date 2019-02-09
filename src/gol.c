@@ -12,29 +12,29 @@
 #include "gol.h"
 #include "paint.h"
 
-int gol_row(int index, int width) {
+int gol_row(int index, int cols) {
     int row;
-    row = (int) index / width;
+    row = (int) index / cols;
     return row;
 }
 
-int gol_col(int index, int row, int width) {
+int gol_col(int index, int row, int cols) {
     int col;
-    col = index - (row * width);
+    col = index - (row * cols);
     return col;
 }
 
-void col_get_cluster(int ns[], int index, int width, int height) {
+void col_get_cluster(int ns[], int index, int cols, int rows) {
 
-    int row = gol_row(index, width);
-    int col = gol_col(index, row, width);
+    int row = gol_row(index, cols);
+    int col = gol_col(index, row, cols);
 
-    //printf("index %d,col %d, row%d, width %d, height %d\n", index, col, row, width, height);
+    //printf("index %d,col %d, row%d, cols %d, rows %d\n", index, col, row, cols, rows);
 
     int above = row - 1 > -1;
-    int below = row + 1 < height;
+    int below = row + 1 < rows;
     int left = col - 1 > -1;
-    int right = col + 1 < width;
+    int right = col + 1 < cols;
 
     //printf("above %d, below %d, left %d, right %d \n", above, below, left, right);
 
@@ -47,27 +47,27 @@ void col_get_cluster(int ns[], int index, int width, int height) {
     // 3  [4]  5
     // 6   7   8
 
-    ns[0] = (above && left)  ? (index - width) - 1 : -1;
-    ns[1] = (above)          ?  index - width      : -1;
-    ns[2] = (above && right) ? (index - width) + 1 : -1;
+    ns[0] = (above && left)  ? (index - cols) - 1 : -1;
+    ns[1] = (above)          ?  index - cols      : -1;
+    ns[2] = (above && right) ? (index - cols) + 1 : -1;
 
     ns[3] = (left)           ? index - 1 : -1;
     ns[4] =                    index;
     ns[5] = (right)          ? index + 1 : -1;
 
-    ns[6] = (below && left)  ? (index + width) - 1 : -1;
-    ns[7] = (below)          ?  index + width      : -1;
-    ns[8] = (below && right) ? (index + width) + 1 : -1;
+    ns[6] = (below && left)  ? (index + cols) - 1 : -1;
+    ns[7] = (below)          ?  index + cols      : -1;
+    ns[8] = (below && right) ? (index + cols) + 1 : -1;
 
 }
 
-int gol_update_cell(int world[], int index, int width, int height) {
+int gol_update_cell(int world[], int index, int cols, int rows) {
 
     int state = world[index];
     int health = 0;
     int neighbours[GOL_CLUSTER_SIZE] = {-1};
 
-    col_get_cluster(neighbours, index, width, height);
+    col_get_cluster(neighbours, index, cols, rows);
 
     for (int n = 0; n < GOL_CLUSTER_SIZE; n++) {
         int nindex = neighbours[n];
@@ -87,21 +87,21 @@ int gol_update_cell(int world[], int index, int width, int height) {
 
 }
 
-void gol_update(int world[], int width, int height) {
+void gol_update(int world[], int cols, int rows) {
 
-    int size = width * height;
+    int size = cols * rows;
 
-    paint_clear_canvas(width, height);
+    paint_clear_canvas(cols, rows);
 
     int out[size];
 
     for (int i = 0; i < size; i++) {
-        int cell = gol_update_cell(world, i, width, height);
+        int cell = gol_update_cell(world, i, cols, rows);
 
-        paint_cell(cell, i, width, height);
+        paint_cell(cell, i, cols, rows);
 
         out[i] = cell;
-        if((i + 1) % width == 0) {
+        if((i + 1) % cols == 0) {
             printf("\n");
         }
     }
@@ -113,8 +113,8 @@ void gol_update(int world[], int width, int height) {
     fflush(stdout);
 }
 
-void gol_init(int world[], int width, int height) {
-    int size = width * height;
+void gol_init(int world[], int cols, int rows) {
+    int size = cols * rows;
     for (int i = 0; i < size; i++) {
        world[i] = rand() % 2;
     }

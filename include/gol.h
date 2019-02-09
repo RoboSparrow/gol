@@ -11,5 +11,5 @@
 
 #define GOL_CLUSTER_SIZE 9
 
-void gol_init(int world[], int width, int height);
-void gol_update(int world[], int width, int height);
+void gol_init(int world[], int cols, int rows);
+void gol_update(int world[], int cols, int rows);
