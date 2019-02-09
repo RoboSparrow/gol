@@ -1,6 +1,11 @@
 _dev/*
 
+# object files
+
 *.o
+
+# executables
 
 main
 gol
+gameoflive
