@@ -114,6 +114,7 @@ void gol_update(int world[], int cols, int rows) {
 }
 
 void gol_init(int world[], int cols, int rows) {
+    srand(time(NULL));
     int size = cols * rows;
     for (int i = 0; i < size; i++) {
        world[i] = rand() % 2;

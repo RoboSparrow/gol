@@ -1,13 +1,11 @@
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 #include "gol.h"
 #include "paint.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int cols = 0;
     int rows = 0;
 
@@ -30,7 +28,6 @@ int main(int argc, char *argv[])
     int size = cols * rows;
     int world[size];
 
-    srand(time(NULL));
     gol_init(world, cols, rows);
     paint_init(cols, rows);
     usleep(100000);
