@@ -16,7 +16,7 @@ OBJ = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 # preprocessor flags
 CPPFLAGS += -Iinclude
 # compiler flags
-CFLAGS += -Wall -g
+CFLAGS += -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow -g
 # linker flags
 LDFLAGS +=
 # thirdparty libraries to link
