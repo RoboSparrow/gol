@@ -1,0 +1,51 @@
+EXECUTABLE = bin/gameoflive
+
+$(info ====== Building SDL app [${EXECUTABLE}] ======)
+
+# create obj sub dirs
+$(shell mkdir -p obj/common obj/sdl)
+
+# list source files and object files
+SRC = $(wildcard src/common/*.c)
+SRC += $(wildcard src/sdl/*.c)
+
+# map objects
+OBJ = $(SRC:src/%.c=obj/%.o)
+
+# Debug info
+# $(info $$SRC => [${SRC}])
+# $(info $$OBJ => [${OBJ}])
+
+## Flags
+
+# preprocessor flags
+CPPFLAGS += -Iinclude
+# compiler flags
+CFLAGS += -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow -g
+# linker flags
+LDFLAGS +=
+# thirdparty libraries to link
+LDLIBS += $(shell pkg-config sdl2 --cflags --libs)
+
+## Recipes
+
+# list rules not  to produce any target output
+.PHONY: all clean
+
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJ)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+obj/common/%.o: src/common/%.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+obj/sdl/%.o: src/sdl/%.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+# maintenance
+
+clean:
+	$(RM) $(OBJ)
+
+# Based on the excellent walkthroughs by [Chnossos](https://stackoverflow.com/a/30602701) and [John Tsiombikas](http://nuclear.mutantstargoat.com/articles/make)
