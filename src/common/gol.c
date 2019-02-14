@@ -88,29 +88,23 @@ int gol_update_cell(int world[], int index, int cols, int rows) {
 }
 
 void gol_update(int world[], int cols, int rows) {
-
     int size = cols * rows;
-
-    paint_clear_canvas(cols, rows);
-
     int out[size];
 
     for (int i = 0; i < size; i++) {
         int cell = gol_update_cell(world, i, cols, rows);
 
-        paint_cell(cell, i, cols, rows);
+        paint_loop_cell(cell, i, cols, rows);
 
         out[i] = cell;
         if((i + 1) % cols == 0) {
-            printf("\n");
+            paint_loop_row_end();
         }
     }
 
     for (int i = 0; i < size; i++) {
        world [i] = out[i];
     }
-
-    fflush(stdout);
 }
 
 void gol_init(int world[], int cols, int rows) {

@@ -13,3 +13,6 @@
 
 void gol_init(int world[], int cols, int rows);
 void gol_update(int world[], int cols, int rows);
+
+int gol_col(int index, int row, int cols);
+int gol_row(int index, int cols);

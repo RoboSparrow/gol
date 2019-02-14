@@ -32,10 +32,13 @@ int main(int argc, char *argv[]) {
     paint_init(cols, rows);
     usleep(100000);
 
-    while(1) {
+    while (1) {
+        paint_loop_start(cols, rows);
         gol_update(world, cols, rows);
+        paint_loop_end(cols, rows);
         usleep(100000);
     }
 
+    paint_exit(cols, rows);
     return 0;
 }
