@@ -1,11 +1,21 @@
 _dev/*
 
 # object files
-
 *.o
+*.obj
+obj/*
+!obj/.gitkeep
+
+# libs
+*.a
+*.lib
 
 # executables
+bin/*
+!bin/.gitkeep
 
-main
-gol
-gameoflive
+# misc
+*.swp
+.~
+thumbs.db
+
