@@ -8,6 +8,11 @@
 void paint_init(int cols, int rows);
 
 /**
+ * clear renderer
+ */
+void paint_clear();
+
+/**
  * render start within an update loop
  */
 void paint_loop_start(int cols, int rows);

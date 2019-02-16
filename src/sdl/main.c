@@ -42,8 +42,18 @@ int main(int argc, char* argv[]) {
             if (e.type == SDL_QUIT) {
                 running = 0;
             }
-            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
-                running = 0;
+
+            if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        running = 0;
+                    break;
+                    case SDLK_RETURN:
+                        paint_clear();
+                        SDL_Delay(1000);
+                        gol_init(world, cols, rows);
+                    break;
+                }
             }
         }
 

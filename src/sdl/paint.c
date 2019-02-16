@@ -44,10 +44,18 @@ void paint_init(int cols, int rows) {
     rect.h = rect_size;
 }
 
-void paint_loop_start(int cols, int rows) {
+void paint_clear() {
+    // Change color to blue
+    SDL_SetRenderDrawColor(renderer, bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
     // Clear the window and make it all green
     SDL_RenderClear(renderer);
-    // Change color to blue
+    SDL_RenderPresent(renderer);
+}
+
+void paint_loop_start(int cols, int rows) {
+    // Clear the window
+    SDL_RenderClear(renderer);
+    // Set drawing color
     SDL_SetRenderDrawColor(renderer, rect_color[0], rect_color[1], rect_color[2], rect_color[3]);
 }
 
@@ -74,4 +82,8 @@ void paint_loop_end(int cols, int rows) {
     SDL_RenderPresent(renderer);
 }
 
-void paint_exit(int cols, int rows) {}
+void paint_exit() {
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
