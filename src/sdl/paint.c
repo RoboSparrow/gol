@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "gol.h"
 
@@ -6,9 +7,68 @@ SDL_Window* window;
 SDL_Renderer* renderer;
 SDL_Rect rect;
 
-int bg_color[4] = { 56, 82, 102, 255 };
-int rect_color[4] = { 226, 192, 68, 255 };
-int rect_size = 20;
+SDL_Color bg_color = { 44, 74, 82, 255 };
+SDL_Color rect_color = { 244, 235, 219, 255 };
+
+int rect_size = 10;
+
+////
+// text
+////
+
+// text/ttf
+TTF_Font *font;
+
+SDL_Texture *text_texture;
+
+SDL_Color text_color = { 134, 155, 151 };
+int font_size = 10;
+
+void font_init() {
+    if(TTF_Init( )== -1) {
+        printf("TTF_Init error: %s\n", TTF_GetError());
+        exit(2);
+    }
+
+    font = TTF_OpenFont("hellovetica.ttf", font_size);
+    if (font == NULL) {
+        printf("TTF_OpenFont error: %s\n", TTF_GetError());
+        exit(2);
+    }
+}
+
+void font_exit() {
+    if(font) {
+        TTF_CloseFont(font);
+    }
+
+    if(text_texture) {
+        SDL_DestroyTexture(text_texture);
+    }
+}
+
+SDL_Rect render_text(char text[]) {
+    int w = 0;
+    int h = 0;
+    SDL_Rect text_rect = { 0, 0, w, h };
+    SDL_Surface *text_surface;
+
+    if (!(text_surface = TTF_RenderUTF8_Solid(font, text, text_color))) {
+        printf("Failed to render text: %p", TTF_GetError());
+        return text_rect;
+    } else {
+        text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+        SDL_QueryTexture(text_texture, NULL, NULL, &w, &h);
+        text_rect.w = w;
+        text_rect.h = h;
+        SDL_FreeSurface(text_surface);
+        return text_rect;
+    }
+}
+
+////
+//  interfaces
+////
 
 void paint_init(int cols, int rows) {
     int sizeX = rect_size * cols;
@@ -33,10 +93,10 @@ void paint_init(int cols, int rows) {
         exit(1);
     }
 
-    // Set size of renderer to the same as window
     SDL_RenderSetLogicalSize(renderer, sizeX, sizeY);
-    // set bg color
-    SDL_SetRenderDrawColor(renderer, bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
+    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
+
+    font_init() ;
 
     rect.x = 0;
     rect.y = 0;
@@ -45,18 +105,14 @@ void paint_init(int cols, int rows) {
 }
 
 void paint_clear() {
-    // Change color to blue
-    SDL_SetRenderDrawColor(renderer, bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
-    // Clear the window and make it all green
+    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
 }
 
 void paint_loop_start(int cols, int rows) {
-    // Clear the window
     SDL_RenderClear(renderer);
-    // Set drawing color
-    SDL_SetRenderDrawColor(renderer, rect_color[0], rect_color[1], rect_color[2], rect_color[3]);
+    SDL_SetRenderDrawColor(renderer, rect_color.r, rect_color.g, rect_color.b, rect_color.a);
 }
 
 void paint_loop_cell(int cell, int index, int cols, int rows) {
@@ -76,13 +132,22 @@ void paint_loop_cell(int cell, int index, int cols, int rows) {
 void paint_loop_row_end() {}
 
 void paint_loop_end(int cols, int rows) {
-    // Change color to green
-    SDL_SetRenderDrawColor(renderer, bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
-    // Render the changes above
+
+    int rw;
+    int rh;
+    SDL_GetRendererOutputSize(renderer, &rw, &rh);
+    SDL_Rect text_rect = render_text("press enter for restart, space for pause");//TODO daw only once and cache
+    text_rect.x = (rw - text_rect.w) / 2;
+    text_rect.y = rh - text_rect.h - 10;
+
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+
+    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
     SDL_RenderPresent(renderer);
 }
 
 void paint_exit() {
+    font_exit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
