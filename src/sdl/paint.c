@@ -2,19 +2,15 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "gol.h"
+#include "state.h"
 
 SDL_Window* window;
 SDL_Renderer* renderer;
 SDL_Rect rect;
 
-SDL_Color bg_color = { 44, 74, 82, 255 };
-SDL_Color rect_color = { 244, 235, 219, 255 };
-
-int rect_size = 10;
-
-////
-// text
-////
+SDL_Color bg_color = { 44, 74, 82, 255 }; // #2C4A52
+SDL_Color rect_color = { 244, 235, 219, 255 }; // #F4EBDB
+SDL_Color grid_color = { 10, 49, 57, 255 }; // bg_color darkened 10%
 
 // text/ttf
 TTF_Font *font;
@@ -24,6 +20,31 @@ SDL_Texture *text_texture;
 SDL_Color text_color = { 134, 155, 151 };
 int font_size = 10;
 
+
+void draw_background(int cols, int rows) {
+    int w;
+    int h;
+    SDL_RenderGetLogicalSize(renderer, &w, &h);
+
+    int ws = w / cols;
+    int hs = h / rows;
+
+    int i;
+    for (i = 0; i < cols; i++) {
+        SDL_RenderDrawLine(renderer, ws * i, 0, ws * i, h);
+    }
+    SDL_RenderDrawLine(renderer, w, 0, w, h);
+
+    for (i = 0; i < rows; i++) {
+        SDL_RenderDrawLine(renderer, 0, hs * i, w, hs * i);
+    }
+    SDL_RenderDrawLine(renderer, 0, h, w, h);
+}
+
+////
+// text
+////
+
 void font_init() {
     if(TTF_Init( )== -1) {
         printf("TTF_Init error: %s\n", TTF_GetError());
@@ -31,6 +52,11 @@ void font_init() {
     }
 
     font = TTF_OpenFont("hellovetica.ttf", font_size);
+    if (font == NULL) {
+         printf("unable to locate font in ./, trying ./bin");
+         font = TTF_OpenFont("bin/hellovetica.ttf", font_size);
+    }
+
     if (font == NULL) {
         printf("TTF_OpenFont error: %s\n", TTF_GetError());
         exit(2);
@@ -71,8 +97,8 @@ SDL_Rect render_text(char text[]) {
 ////
 
 void paint_init(int cols, int rows) {
-    int sizeX = rect_size * cols;
-    int sizeY = rect_size * rows;
+    int sizeX = UNIT_SIZE * cols;
+    int sizeY = UNIT_SIZE * rows;
 
     if (SDL_Init(SDL_INIT_EVERYTHING) == -1) {
         printf(" Failed to initialize SDL : %p", SDL_GetError());
@@ -100,8 +126,8 @@ void paint_init(int cols, int rows) {
 
     rect.x = 0;
     rect.y = 0;
-    rect.w = rect_size;
-    rect.h = rect_size;
+    rect.w = UNIT_SIZE;
+    rect.h = UNIT_SIZE;
 }
 
 void paint_clear() {
@@ -112,7 +138,10 @@ void paint_clear() {
 
 void paint_loop_start(int cols, int rows) {
     SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer, grid_color.r, grid_color.g, grid_color.b, grid_color.a);
+    draw_background(cols, rows);
     SDL_SetRenderDrawColor(renderer, rect_color.r, rect_color.g, rect_color.b, rect_color.a);
+
 }
 
 void paint_loop_cell(int cell, int index, int cols, int rows) {
@@ -122,8 +151,8 @@ void paint_loop_cell(int cell, int index, int cols, int rows) {
         int row = gol_row(index, cols);
         int col = gol_col(index, row, cols);
 
-        rect.x = rect_size * col;
-        rect.y = rect_size * row;
+        rect.x = UNIT_SIZE * col;
+        rect.y = UNIT_SIZE * row;
 
         SDL_RenderFillRect(renderer, &rect);
     }
