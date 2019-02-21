@@ -19,7 +19,7 @@ OBJ = $(SRC:src/%.c=obj/%.o)
 ## Flags
 
 # preprocessor flags
-CPPFLAGS += -Iinclude -Isrc/sdl/include
+CPPFLAGS += -Iinclude -Isrc/sdl
 # compiler flags
 CFLAGS += -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow -g
 # linker flags

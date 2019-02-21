@@ -4,6 +4,7 @@
 
 #include "gol.h"
 #include "paint.h"
+#include "state.h"
 
 int main(int argc, char* argv[]) {
     int running = 1;
