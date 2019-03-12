@@ -9,8 +9,6 @@
 #define GOL_DEAD 0
 #define GOL_ALIVE 1
 
-#define GOL_CLUSTER_SIZE 9
-
 void gol_init(int world[], int cols, int rows);
 void gol_update(int world[], int cols, int rows);
 
