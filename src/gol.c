@@ -2,6 +2,7 @@
 #include <time.h>
 #include <math.h>
 #include <string.h>
+#include <malloc.h>
 #include <stdlib.h>
 
 #include "gol.h"
@@ -116,3 +117,105 @@ void gol_init(char *world, int cols, int rows) {
     }
 }
 
+/**
+ * allocate memory for a data matrix
+ * @param data reference to data matrix pointer (1D char array)
+ * @param cols width of data matrix
+ * @param rows height of data matrix
+ */
+void gol_allocate_data(char **data, int cols, int rows) {
+    // prepare data
+    size_t size = rows * cols * sizeof(char);
+
+    *data = (char *)malloc(size);
+
+    if (*data == NULL) {
+        perror("Could not allocate enoughmemory for pattern->data.\n");
+        exit(EXIT_FAILURE);
+    }
+    // fill pattern with default cell value (dead)
+    memset(*data, GOL_DEAD, size);
+}
+
+/**
+ * free memory for a data matrix
+ * @param data reference to data matrix pointer (1D char array)
+ */
+void gol_free_data(char *data) {
+    if (data == NULL) {
+        return;
+    }
+    free(data);
+}
+
+/**
+ * merge data matrix src into data matrix targ
+ * should src offset + width extend the targ with src will be cut off,same applies for targ height
+ * psrc can be placed into targ with an x and y offset
+ * @param *src pointer to source data matrix (1D char array)
+ * @param scols source data matrix width
+ * @param srows source data matrix height
+ * @param *targ pointer to target data matrix (1D char array)
+ * @param tcols target data matrix width
+ * @param trows target data matrix height
+ * @param offsetcols target x-offset, number of columns
+ * @param offsetrows target y-offset, number of rows
+ */
+void gol_merge_data(
+    char *src, int scols, int srows,
+    char *targ, int tcols, int trows,
+    int offsetcols, int offsetrows
+) {
+    int index;
+    for (int r = 0; r < srows; r++) {
+        // boundary
+        if (offsetrows + r > trows) {
+            printf("row break\n");
+            break;
+        }
+        index = (r + offsetrows) * tcols + offsetcols;
+
+        for (int c = 0; c < scols; c++) {
+            // boundary
+            if (offsetcols + c > tcols) {
+                break;
+            }
+            int offset = (r * scols) + c;
+            targ[index] = src[offset];
+
+            index++;
+        }
+    }
+}
+
+/**
+ * prints pattern info
+ * @param pattern Pattern struct
+ */
+void gol_print_pattern(Pattern *pattern) {
+    if (pattern == NULL) {
+        printf("- pattern is empty\n");
+    }
+
+    printf("    |_ title: %s\n", pattern->title);
+    printf("    |_ description: %s\n", pattern->description);
+    printf("    |_ file: %s\n", pattern->file);
+    printf("    |_ cols: %d\n", pattern->cols);
+    printf("    |_ rows: %d\n", pattern->rows);
+}
+
+/**
+ * prints a data matrix
+ * @param data reference to data matrix pointer (1D char array)
+ * @param cols width of data matrix
+ * @param rows height of data matrix
+ */
+void gol_print_data(char *data, int cols, int rows) { //TODO (data, rows, cols)
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            int offset = (r * cols) + c;
+            printf("%c", data[offset]);
+        }
+        printf("\n");
+    }
+}
