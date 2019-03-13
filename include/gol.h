@@ -1,13 +1,30 @@
 /**
- * @see https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
- * Any live cell with fewer than two live neighbors dies, as if by underpopulation.
- * Any live cell with two or three live neighbors lives on to the next generation.
- * Any live cell with more than three live neighbors dies, as if by overpopulation.
- * Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+ * definitions for Game of Live data
  */
 
 #define GOL_DEAD '.' /** defines value for a dead cell */
 #define GOL_ALIVE 'O' /** defines value for a living cell */
+
+#define LINE_BOUNDS 255 /** max line length, for header and comment lines only */
+
+#ifndef PATTERN_GUARD
+#define PATTERN_GUARD
+typedef struct pattern {
+    char title[LINE_BOUNDS];
+    char description[LINE_BOUNDS];
+    char file[LINE_BOUNDS];
+    int cols;
+    int rows;
+} Pattern;
+#endif
+
+void gol_print_pattern(Pattern *pattern);
+
+void gol_allocate_data(char **data,  int cols, int rows);
+void gol_free_data(char *data);
+void gol_print_data(char *data, int cols, int rows);
+
+void gol_merge_data(char *src, int scols, int srows, char *targ, int tcols, int trows, int offsetcols, int offsetrows);
 
 // 0   1   2
 // 3  [4]  5
