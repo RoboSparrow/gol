@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     }
 
     int size = cols * rows;
-    int world[size];
+    char *world = calloc(size, sizeof(char));
 
     gol_init(world, cols, rows);
     paint_init(cols, rows);
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
             paint_loop_end(cols, rows);
         }
 
-        SDL_Delay(100); // 10 fps
+        SDL_Delay(100); // 10 fps: 100
     }
 
     paint_exit(cols, rows);
