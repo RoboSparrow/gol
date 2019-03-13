@@ -14,7 +14,6 @@ Pattern parse_args(int argc, char* argv[]) {
     int cols = 0;
     int rows = 0;
 
-
     char usage[] = "usage: %s [-c numberofcols] [-r numberofrows] [-p patternfile]\n";
     while ((opt = getopt (argc, argv, "r:c:p:h")) != -1) {
         switch (opt)  {
@@ -68,11 +67,8 @@ int main(int argc, char* argv[]) {
     int cols = pattern.cols;
     int rows = pattern.rows;
 
-    int size = cols * rows;
-    char *world = calloc(size, sizeof(char));
-    if(world == NULL) {
-        fprintf(stderr, "Not enough memory for allocating world data");
-    }
+    char *world;
+    gol_allocate_data(&world, cols, rows);
 
     gol_init(world, cols, rows);
     paint_init(cols, rows);
@@ -113,10 +109,7 @@ int main(int argc, char* argv[]) {
     }
 
     paint_exit(cols, rows);
-
-    if (world != NULL) {
-        free(world);
-    }
+    gol_free_data(world);
 
     return 0;
 }
