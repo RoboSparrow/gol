@@ -1,24 +1,48 @@
 // adapted to c: http://headerphile.com/sdl2/sdl2-part-4-making-things-happen/
 #include <stdio.h>
+#include <unistd.h>
 #include <SDL2/SDL.h>
 
 #include "gol.h"
 #include "paint.h"
 #include "state.h"
 
-int main(int argc, char* argv[]) {
-    int running = 1;
-    int paused = 0;
+char *patternfile = "";
 
+Pattern parse_args(int argc, char* argv[]) {
+    int opt;
     int cols = 0;
     int rows = 0;
 
-    if (argc > 1) {
-        cols = atoi(argv[1]);
+
+    char usage[] = "usage: %s [-c numberofcols] [-r numberofrows] [-p patternfile]\n";
+    while ((opt = getopt (argc, argv, "r:c:p:h")) != -1) {
+        switch (opt)  {
+            case 'c':
+                cols = atoi(optarg);
+            break;
+            case 'r':
+                rows = atoi(optarg);
+            break;
+            case 'p':
+                patternfile = optarg;
+            break;
+            case 'h':
+                fprintf(stderr, usage, argv[0]);
+                exit(EXIT_SUCCESS);
+            break;
+            case '?':
+                fprintf(stderr, usage, argv[0]);
+                exit(EXIT_FAILURE);
+            break;
+        }
     }
 
-    if (argc > 2) {
-        rows = atoi(argv[2]);
+    if(strlen(patternfile) > 0) {
+        if (access(patternfile, F_OK)) {
+            fprintf(stderr, "cannot load pattern file %s\n", patternfile);
+            exit(EXIT_FAILURE);
+        }
     }
 
     if (cols <= 0) {
@@ -29,12 +53,27 @@ int main(int argc, char* argv[]) {
         rows = cols;
     }
 
+    Pattern pattern = {
+        .cols = cols,
+        .rows = rows
+    };
+    return pattern;
+}
+
+int main(int argc, char* argv[]) {
+    int running = 1;
+    int paused = 0;
+
+    Pattern pattern = parse_args(argc, argv);
+    int cols = pattern.cols;
+    int rows = pattern.rows;
+
     int size = cols * rows;
     char *world = calloc(size, sizeof(char));
     if(world == NULL) {
         fprintf(stderr, "Not enough memory for allocating world data");
     }
-    
+
     gol_init(world, cols, rows);
     paint_init(cols, rows);
 
@@ -74,7 +113,7 @@ int main(int argc, char* argv[]) {
     }
 
     paint_exit(cols, rows);
-    
+
     if (world != NULL) {
         free(world);
     }
