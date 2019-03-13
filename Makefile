@@ -29,16 +29,19 @@ LDLIBS += $(shell pkg-config sdl2 --cflags --libs) -lSDL2_ttf -lm
 ## Recipes
 
 # list rules not  to produce any target output
-.PHONY: all clean
+.PHONY: all assets clean
 
-all: $(EXECUTABLE)
+all: $(EXECUTABLE) assets
 
 $(EXECUTABLE): $(OBJ)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 obj/%.o: src/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+assets:
 	cp -f assets/fonts/hellovetica.ttf bin/hellovetica.ttf
+	mkdir -p bin/patterns && cp -a -f assets/patterns/. bin/patterns/
 
 # maintenance
 
