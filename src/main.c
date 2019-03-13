@@ -31,7 +31,10 @@ int main(int argc, char* argv[]) {
 
     int size = cols * rows;
     char *world = calloc(size, sizeof(char));
-
+    if(world == NULL) {
+        fprintf(stderr, "Not enough memory for allocating world data");
+    }
+    
     gol_init(world, cols, rows);
     paint_init(cols, rows);
 
@@ -71,5 +74,10 @@ int main(int argc, char* argv[]) {
     }
 
     paint_exit(cols, rows);
+    
+    if (world != NULL) {
+        free(world);
+    }
+
     return 0;
 }
