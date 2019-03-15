@@ -2,8 +2,13 @@
  * misc utility units
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
+#include <unistd.h>
+
+#include "utils.h"
 
 /**
  * strips whistespaces from a string
@@ -57,4 +62,34 @@ char *str_getfileext(char *filename) {
         return "";
     }
     return dot + 1;
+}
+
+/**
+ * TODO
+ * Resolves a path segment based on the current working directory
+ * If no segment is passed, the function will return the absolute path of the current working directory.
+ * @param segment path segement (i.e."patterns")
+ * @param path Path buffer to write into
+ *
+ *
+ */
+int path_build(char *segment, Path path) {
+    extern Path FS_ROOT_DIR;
+
+    strcpy(path, FS_ROOT_DIR);
+    if (segment[0] == '\0') {
+        return strlen(path);
+    }
+
+    int clen = strlen(FS_ROOT_DIR) + strlen(segment);
+    if (clen > PATH_MAX) {
+        fprintf(stderr, "path_resolve: combined len %d is lager than MAX_PATH (%d) \n", clen, PATH_MAX);
+        return 0;
+    }
+
+    strcat(path, "/");
+    strcat(path, segment);
+
+    // todo check with access?
+    return strlen(path);
 }

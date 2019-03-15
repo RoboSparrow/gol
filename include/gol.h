@@ -5,21 +5,6 @@
 #define GOL_DEAD '.' /** defines value for a dead cell */
 #define GOL_ALIVE 'O' /** defines value for a living cell */
 
-#define LINE_BOUNDS 255 /** max line length, for header and comment lines only */
-
-#ifndef PATTERN_GUARD
-#define PATTERN_GUARD
-typedef struct pattern {
-    char title[LINE_BOUNDS];
-    char description[LINE_BOUNDS];
-    char file[LINE_BOUNDS];
-    int cols;
-    int rows;
-} Pattern;
-#endif
-
-void gol_print_pattern(Pattern *pattern);
-
 void gol_allocate_data(char **data,  int cols, int rows);
 void gol_free_data(char *data);
 void gol_print_data(char *data, int cols, int rows);

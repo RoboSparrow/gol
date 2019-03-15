@@ -130,10 +130,10 @@ void gol_allocate_data(char **data, int cols, int rows) {
     *data = (char *)malloc(size);
 
     if (*data == NULL) {
-        perror("Could not allocate enoughmemory for pattern->data.\n");
+        perror("Could not allocate enough memory for data.\n");
         exit(EXIT_FAILURE);
     }
-    // fill pattern with default cell value (dead)
+    // fill data with default cell value (dead)
     memset(*data, GOL_DEAD, size);
 }
 
@@ -186,22 +186,6 @@ void gol_merge_data(
             index++;
         }
     }
-}
-
-/**
- * prints pattern info
- * @param pattern Pattern struct
- */
-void gol_print_pattern(Pattern *pattern) {
-    if (pattern == NULL) {
-        printf("- pattern is empty\n");
-    }
-
-    printf("    |_ title: %s\n", pattern->title);
-    printf("    |_ description: %s\n", pattern->description);
-    printf("    |_ file: %s\n", pattern->file);
-    printf("    |_ cols: %d\n", pattern->cols);
-    printf("    |_ rows: %d\n", pattern->rows);
 }
 
 /**

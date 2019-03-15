@@ -3,6 +3,7 @@
 
 #include "gol.h"
 #include "state.h"
+#include "utils.h"
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -46,20 +47,18 @@ void draw_background(int cols, int rows) {
 ////
 
 void font_init() {
+    Path path;
+    path_build("hellovetica.ttf", path);
+
     if(TTF_Init( )== -1) {
         fprintf(stderr, "TTF_Init error: %s\n", TTF_GetError());
-        exit(2);
+        exit(EXIT_FAILURE);
     }
 
-    font = TTF_OpenFont("hellovetica.ttf", font_size);
+    font = TTF_OpenFont(path, font_size);
     if (font == NULL) {
          fprintf(stderr, "unable to locate font in ./, trying ./bin\n");
-         font = TTF_OpenFont("bin/hellovetica.ttf", font_size);
-    }
-
-    if (font == NULL) {
-        fprintf(stderr, "TTF_OpenFont error: %s\n", TTF_GetError());
-        exit(2);
+         exit(EXIT_FAILURE);
     }
 }
 
@@ -102,21 +101,21 @@ void paint_init(int cols, int rows) {
 
     if (SDL_Init(SDL_INIT_EVERYTHING) == -1) {
         fprintf(stderr, " Failed to initialize SDL : %p\n", SDL_GetError());
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // @see https://wiki.libsdl.org/SDL_WindowFlags
     window = SDL_CreateWindow( "RoboSparrow's game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
     if (window == NULL) {
         fprintf(stderr, "Failed to create window : %p\n", SDL_GetError());
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // @see https://wiki.libsdl.org/SDL_RendererFlags
     renderer = SDL_CreateRenderer(window, -1, 0);
     if(renderer == NULL){
         fprintf(stderr, "Failed to create renderer : %p\n", SDL_GetError());
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     SDL_RenderSetLogicalSize(renderer, sizeX, sizeY);

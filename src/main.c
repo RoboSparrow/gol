@@ -2,12 +2,17 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <SDL2/SDL.h>
+#include <libgen.h>
 
+#include "utils.h"
 #include "gol.h"
 #include "paint.h"
 #include "state.h"
+#include "rle-parser.h"
+#include "pattern.h"
 
-char *patternfile = "";
+Path patternfile = "";
+Path FS_ROOT_DIR;
 
 Pattern parse_args(int argc, char* argv[]) {
     int opt;
@@ -15,7 +20,7 @@ Pattern parse_args(int argc, char* argv[]) {
     int rows = 0;
 
     char usage[] = "usage: %s [-c numberofcols] [-r numberofrows] [-p patternfile]\n";
-    while ((opt = getopt (argc, argv, "r:c:p:h")) != -1) {
+    while ((opt = getopt (argc, argv, "r:c:p:h:l")) != -1) {
         switch (opt)  {
             case 'c':
                 cols = atoi(optarg);
@@ -23,16 +28,28 @@ Pattern parse_args(int argc, char* argv[]) {
             case 'r':
                 rows = atoi(optarg);
             break;
+            case 'l': {
+                PatternList *list = pattern_load_patternlist("patterns", "rle");
+                if(list == NULL) {
+                    fprintf(stderr, "unable to load pattern list");
+                    exit(EXIT_FAILURE);
+                }
+                for(int i = 0; i < list->len; i++) {
+                    printf("- pattern %d\n", i);
+                    pattern_print_pattern(list->patterns[i]);
+                }
+                pattern_free_patternlist(list);
+                exit(EXIT_SUCCESS);
+            }
+            break;
             case 'p':
-                patternfile = optarg;
+                path_build(optarg, patternfile);
+                printf("%s\n", patternfile);
             break;
             case 'h':
-                fprintf(stderr, usage, argv[0]);
-                exit(EXIT_SUCCESS);
-            break;
             case '?':
                 fprintf(stderr, usage, argv[0]);
-                exit(EXIT_FAILURE);
+                exit(EXIT_SUCCESS);
             break;
         }
     }
@@ -55,22 +72,70 @@ Pattern parse_args(int argc, char* argv[]) {
     Pattern pattern = {
         .cols = cols,
         .rows = rows
+        // .file is reserved for later implementation of saved games
     };
     return pattern;
 }
 
 int main(int argc, char* argv[]) {
+
     int running = 1;
     int paused = 0;
 
-    Pattern pattern = parse_args(argc, argv);
-    int cols = pattern.cols;
-    int rows = pattern.rows;
+    // root dir
+    // TODO this needs to be made os and runtime compatible
+    if(*argv[0] == '/') {
+        strcpy(FS_ROOT_DIR, argv[0]);
+    } else {
+        realpath(argv[0], FS_ROOT_DIR);
+    }
+    dirname(FS_ROOT_DIR);
 
+    // meta from args
+    Pattern meta = parse_args(argc, argv);
+    int cols = meta.cols;
+    int rows = meta.rows;
+
+    // init world data
     char *world;
     gol_allocate_data(&world, cols, rows);
 
-    gol_init(world, cols, rows);
+    if(strlen(patternfile) == 0) {
+        gol_init(world, cols, rows);
+    } else {
+        char *data;
+        Pattern patt = {
+            .title = "",
+            .description = "",
+            .file = "",
+            .cols = 0,
+            .rows = 0
+        };
+        Pattern *pattern = &patt;
+
+        int loaded  = rle_load_meta(patternfile, pattern);
+        if(loaded < 0) {
+            printf("error loading pattern file %s\n", patternfile);
+            return EXIT_FAILURE;
+        }
+
+        gol_allocate_data(&data, pattern->cols, pattern->rows);
+
+        int parsed = rle_load_data(pattern, data);
+        if(parsed < 0) {
+            printf("error loading pattern file %s\n", patternfile);
+            return EXIT_FAILURE;
+        }
+
+        gol_merge_data(
+            data, pattern->cols, pattern->rows,
+            world, cols, rows,
+            2, 2
+        );
+
+        gol_free_data(data);
+    }
+
     paint_init(cols, rows);
 
     SDL_Event e;
@@ -105,7 +170,7 @@ int main(int argc, char* argv[]) {
             paint_loop_end(cols, rows);
         }
 
-        SDL_Delay(100); // 10 fps: 100
+        SDL_Delay(50); // 15 fps
     }
 
     paint_exit(cols, rows);

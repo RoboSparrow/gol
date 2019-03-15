@@ -16,15 +16,15 @@
  * Anything after the final ! is ignored. It used to be common to put comments here (starting on a new line),
  * but the usual method for adding comments is now by means of #C lines (see below).
  */
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <dirent.h>
-#include <malloc.h>
 
 #include "utils.h"
 #include "gol.h"
+#include "pattern.h"
 
 #define REL_CELL_DEAD 'b' /** defines value for a dead RLE cell */
 #define REL_CELL_ALIVE 'o' /** defines value for a living RLE cell */
@@ -306,9 +306,6 @@ int rle_load_data(Pattern *pattern, char *data) {
         return -1;
     }
 
-    // store filepath
-    strcpy(pattern->file, pattern->file);
-
     int i = 0;
     char identifier;
     for (i = 0; 1; i++) {
@@ -341,89 +338,4 @@ int rle_load_data(Pattern *pattern, char *data) {
     fclose(fp);
 
     return 0;
-}
-
-////
-// pattern directory listing funbction
-////
-
-/**
- * creates pattern list - read a directory of files, filter out pattern files by extension and parse meta data into a list
- * @param path directory path
- * @param ext file extension to filter directory for
- * @param patterns reference to an initialized array of Pattern structs, this may be empoty. The required memory will be expanded by this function
- * @return -1 on error, else number of patterns parsed, 0 if empty
- */
-int rle_patternlist_from_dir(char *path, char *ext, Pattern ***patterns) {
-    DIR *dir;
-    int len = 0;
-    struct dirent *e = NULL;
-
-    dir = opendir(path);
-    if(dir == NULL) {
-        fprintf(stderr, "rle-parser: Unable able to open dir %s.\n", path);
-        return -1;
-    }
-
-    //// first count
-    e = readdir(dir);
-    while(NULL != e){
-        char *fext = str_getfileext(e->d_name);
-        if(strcmp(fext, ext) == 0) {
-            // printf("%s\n", e->d_name);
-            len++;
-        }
-        e = readdir(dir);
-    }
-    rewinddir(dir);
-
-    //// allocate patterns
-
-    *patterns = (Pattern **) realloc(**patterns, len * sizeof(Pattern *));
-    if(*patterns == NULL) {
-        fprintf(stderr, "rle-parser: unable to re-allocate memory for patterns.\n");
-        return -1;
-    }
-
-    int i = 0;
-    e = readdir(dir);
-    while(NULL != e){
-        char *fext = str_getfileext(e->d_name);
-        if(strcmp(fext, ext) == 0) {
-                Pattern *pattern = calloc(1, sizeof(Pattern));
-
-                strcpy(pattern->file, path);
-                strcat(pattern->file, "/");
-                strcat(pattern->file, e->d_name);
-
-                int loaded  = rle_load_meta(pattern->file, pattern);
-                if(loaded < 0) {
-                    fprintf(stderr, "error loading pattern file %s\n", pattern->file);
-                } else {
-                    (*patterns)[i] = pattern;
-                    i++;
-                }
-        }
-
-        e = readdir(dir);
-    }
-
-    closedir(dir);
-    return len;
-}
-
-/**
- * free a pattern list
- * @param patterns reference to an initialized array of Pattern structs,
- * @param len length of list
- */
-void rle_free_patternlist(Pattern **patterns, int len) {
-    if(patterns != NULL) {
-        for(int i = 0; i < len; i++) {
-            if(patterns[i] != NULL) {
-                free(patterns[i]);
-            }
-        }
-        free(patterns);
-    }
 }
