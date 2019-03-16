@@ -14,6 +14,25 @@
 Path patternfile = "";
 Path FS_ROOT_DIR;
 
+// todo understand that
+void clean_buffer(){
+    int n;
+    while((n = getchar()) != EOF && n != '\n' );
+}
+
+int select_pattern(int len) {
+    printf("--------------\n");
+    int selected = 0;
+    int cl;
+    do {
+        printf("select pattern:");
+        scanf("%d", &selected);
+        while((cl = getchar()) != EOF && cl != '\n'); //clean the buffer
+
+    } while(selected <= 0 || selected > len);
+    return selected;
+}
+
 void parse_args(int argc, char* argv[], Pattern *meta) {
     int opt;
     int cols = 0;
@@ -34,12 +53,18 @@ void parse_args(int argc, char* argv[], Pattern *meta) {
                     fprintf(stderr, "unable to load pattern list");
                     exit(EXIT_FAILURE);
                 }
+
                 for(int i = 0; i < list->len; i++) {
-                    printf("- pattern %d\n", i);
+                    printf("- %d\n", i);
                     pattern_print_pattern(list->patterns[i]);
                 }
+                int selected = select_pattern(list->len);
+
+                printf("%s\n", list->patterns[selected]->file);
+                strcpy(patternfile, list->patterns[selected]->file);
+
                 pattern_free_patternlist(list);
-                exit(EXIT_SUCCESS);
+                // exit(EXIT_SUCCESS);
             }
             break;
             case 'p':
