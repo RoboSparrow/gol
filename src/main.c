@@ -14,7 +14,7 @@
 Path patternfile = "";
 Path FS_ROOT_DIR;
 
-Pattern parse_args(int argc, char* argv[]) {
+void parse_args(int argc, char* argv[], Pattern *meta) {
     int opt;
     int cols = 0;
     int rows = 0;
@@ -44,20 +44,12 @@ Pattern parse_args(int argc, char* argv[]) {
             break;
             case 'p':
                 path_build(optarg, patternfile);
-                printf("%s\n", patternfile);
             break;
             case 'h':
             case '?':
                 fprintf(stderr, usage, argv[0]);
                 exit(EXIT_SUCCESS);
             break;
-        }
-    }
-
-    if(strlen(patternfile) > 0) {
-        if (access(patternfile, F_OK)) {
-            fprintf(stderr, "cannot load pattern file %s\n", patternfile);
-            exit(EXIT_FAILURE);
         }
     }
 
@@ -69,12 +61,9 @@ Pattern parse_args(int argc, char* argv[]) {
         rows = cols;
     }
 
-    Pattern pattern = {
-        .cols = cols,
-        .rows = rows
-        // .file is reserved for later implementation of saved games
-    };
-    return pattern;
+    meta->cols = cols;
+    meta->rows = rows;
+    // meta->file is reserved for later implementation of saved games
 }
 
 int main(int argc, char* argv[]) {
@@ -91,54 +80,40 @@ int main(int argc, char* argv[]) {
     }
     dirname(FS_ROOT_DIR);
 
-    // meta from args
-    Pattern meta = parse_args(argc, argv);
-    int cols = meta.cols;
-    int rows = meta.rows;
+    // init world meta
+    Pattern *meta = pattern_allocate_pattern();
+    if (meta == NULL) {
+        return EXIT_FAILURE;
+    }
+
+    // merge args
+    parse_args(argc, argv, meta);
+    int cols = meta->cols;
+    int rows = meta->rows;
 
     // init world data
-    char *world;
-    gol_allocate_data(&world, cols, rows);
+    char *world = gol_allocate_data(cols, rows);
+    if (world == NULL) {
+        return EXIT_FAILURE;
+    }
 
     if(strlen(patternfile) == 0) {
+        // random world
         gol_init(world, cols, rows);
     } else {
-        char *data;
-        Pattern patt = {
-            .title = "",
-            .description = "",
-            .file = "",
-            .cols = 0,
-            .rows = 0
-        };
-        Pattern *pattern = &patt;
-
-        int loaded  = rle_load_meta(patternfile, pattern);
-        if(loaded < 0) {
-            printf("error loading pattern file %s\n", patternfile);
+        // pattern from file
+        int merged = pattern_merge_from_file(patternfile, "rle",  world, cols, rows, 2, 2);
+        if(merged <= 0) {
             return EXIT_FAILURE;
         }
-
-        gol_allocate_data(&data, pattern->cols, pattern->rows);
-
-        int parsed = rle_load_data(pattern, data);
-        if(parsed < 0) {
-            printf("error loading pattern file %s\n", patternfile);
-            return EXIT_FAILURE;
-        }
-
-        gol_merge_data(
-            data, pattern->cols, pattern->rows,
-            world, cols, rows,
-            2, 2
-        );
-
-        gol_free_data(data);
     }
 
     paint_init(cols, rows);
-
     SDL_Event e;
+
+    // add a small delay so that return key event from cli is not captured
+    // TODO use var
+    SDL_Delay(100);
 
     while (running) {
         while (SDL_PollEvent(&e) != 0) {
@@ -157,8 +132,15 @@ int main(int argc, char* argv[]) {
                     case SDLK_RETURN:
                         paint_clear();
                         paused = 0;
-                        SDL_Delay(1000);
-                        gol_init(world, cols, rows);
+                        SDL_Delay(200);
+                            if(strlen(patternfile) == 0) {
+                                // random world
+                                gol_init(world, cols, rows);
+                            } else {
+                                // pattern from file
+                                gol_clear_data(world);
+                                pattern_merge_from_file(patternfile, "rle",  world, cols, rows, 2, 2); // not checking for failure again
+                            }
                     break;
                 }
             }
@@ -173,7 +155,9 @@ int main(int argc, char* argv[]) {
         SDL_Delay(50); // 15 fps
     }
 
+    running = 0;
     paint_exit(cols, rows);
+    pattern_free_pattern(meta);
     gol_free_data(world);
 
     return 0;

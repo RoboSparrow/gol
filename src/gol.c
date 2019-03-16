@@ -118,23 +118,32 @@ void gol_init(char *world, int cols, int rows) {
 }
 
 /**
- * allocate memory for a data matrix
- * @param data reference to data matrix pointer (1D char array)
+ * create and allocate a data matrix
  * @param cols width of data matrix
  * @param rows height of data matrix
  */
-void gol_allocate_data(char **data, int cols, int rows) {
+char *gol_allocate_data(int cols, int rows) {
     // prepare data
     size_t size = rows * cols * sizeof(char);
 
-    *data = (char *)malloc(size);
+    char *data = (char *)malloc(size);
 
-    if (*data == NULL) {
+    if (data == NULL) {
         perror("Could not allocate enough memory for data.\n");
-        exit(EXIT_FAILURE);
+        return data;
     }
     // fill data with default cell value (dead)
-    memset(*data, GOL_DEAD, size);
+    memset(data, GOL_DEAD, size);
+    return data;
+}
+
+/**
+ * clears a data matrix
+ * @param data reference to data matrix pointer (1D char array)
+ */
+void gol_clear_data(char *data) {
+    // prepare data
+    memset(data, GOL_DEAD, strlen(data) * sizeof(char));
 }
 
 /**
@@ -170,7 +179,6 @@ void gol_merge_data(
     for (int r = 0; r < srows; r++) {
         // boundary
         if (offsetrows + r > trows) {
-            printf("row break\n");
             break;
         }
         index = (r + offsetrows) * tcols + offsetcols;

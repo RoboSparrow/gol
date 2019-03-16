@@ -302,7 +302,8 @@ int rle_load_data(Pattern *pattern, char *data) {
     fp = fopen(pattern->file, "r");
 
     if (fp == NULL) {
-        perror("Error while opening the file.\n");
+
+        fprintf(stderr, "Error while opening the file.\n");
         return -1;
     }
 
@@ -338,4 +339,28 @@ int rle_load_data(Pattern *pattern, char *data) {
     fclose(fp);
 
     return 0;
+}
+
+
+char *rle_load_pattern(char *file, Pattern *pattern) {
+
+    int loaded  = rle_load_meta(file, pattern);
+    if(loaded < 0) {
+        fprintf(stderr,"error loading pattern file meta %s\n", file);
+        return NULL;
+    }
+
+    char *data = gol_allocate_data(pattern->cols, pattern->rows);
+    if(data == NULL) {
+        fprintf(stderr, "pattern_merge: error allocating memory for data");
+        return NULL;
+    }
+
+    int parsed = rle_load_data(pattern, data);
+    if(parsed < 0) {
+        fprintf(stderr, "error loading pattern file data %s\n", file);
+        return NULL;
+    }
+
+    return data;
 }

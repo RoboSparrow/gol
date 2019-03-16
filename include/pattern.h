@@ -22,6 +22,11 @@ typedef struct patternList {
 } PatternList;
 #endif
 
-PatternList *pattern_load_patternlist(char *path, char *ext);
+PatternList *pattern_load_patternlist(char *dirname, char *ext);
 void pattern_free_patternlist(PatternList *list);
+
+Pattern *pattern_allocate_pattern();
+void pattern_free_pattern(Pattern *pattern);
 void pattern_print_pattern(Pattern *pattern);
+
+int pattern_merge_from_file(char *patternfile, char *ext, char *world, int cols, int rows, int colOffset, int rowOffset);
