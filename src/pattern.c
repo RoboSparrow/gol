@@ -33,10 +33,16 @@ void pattern_free_pattern(Pattern *pattern) {
  * creates pattern list - read a directory of files, filter out pattern files by extension and parse meta data into a list
  * @param dirname  name of tartget dir within the directory of the executable
  * @param ext file extension to filter directory for
- * @param patterns reference to an initialized array of Pattern structs, this may be empoty. The required memory will be expanded by this function
- * @return -1 on error, else number of patterns parsed, 0 if empty
  */
-int pattern_read_dir(char *dirname, char *ext, Pattern ***patterns) {
+PatternList *pattern_load_patternlist(char *dirname, char *ext) {
+
+    PatternList li = {
+        .len = 0,
+        .patterns = NULL,
+    };
+    PatternList *list = &li;
+
+    // open dir
     DIR *dir;
     int len = 0;
     struct dirent *e = NULL;
@@ -47,10 +53,10 @@ int pattern_read_dir(char *dirname, char *ext, Pattern ***patterns) {
     dir = opendir(path);
     if(dir == NULL) {
         fprintf(stderr, "rle-parser: Unable able to open dir %s.\n", path);
-        return -1;
+        return NULL;
     }
 
-    //// first count
+    // get length
     e = readdir(dir);
     while(NULL != e){
         char *fext = str_getfileext(e->d_name);
@@ -62,14 +68,15 @@ int pattern_read_dir(char *dirname, char *ext, Pattern ***patterns) {
     }
     rewinddir(dir);
 
-    //// allocate patterns
-
-    *patterns = (Pattern **) realloc(**patterns, len * sizeof(Pattern *));
-    if(*patterns == NULL) {
+    // allocate mem for patterns
+    list->len = len;
+    list->patterns = (Pattern **) malloc(len * sizeof(Pattern *));
+    if(list->patterns == NULL) {
         fprintf(stderr, "rle-parser: unable to re-allocate memory for patterns.\n");
-        return -1;
+        return NULL;
     }
 
+    // read files and parse meta data
     int i = 0;
     e = readdir(dir);
     while(NULL != e){
@@ -90,7 +97,7 @@ int pattern_read_dir(char *dirname, char *ext, Pattern ***patterns) {
                 if(loaded < 0) {
                     fprintf(stderr, "error loading pattern file %s\n", pattern->file);
                 } else {
-                    (*patterns)[i] = pattern;
+                    list->patterns[i] = pattern;
                     i++;
                 }
         }
@@ -99,39 +106,6 @@ int pattern_read_dir(char *dirname, char *ext, Pattern ***patterns) {
     }
 
     closedir(dir);
-    return len;
-}
-
-/**
- * creates pattern list collection and loads pattern files wtih a given extension in a given directory
- * @param dirname  name of tartget dir within the directory of the executable
- * @param ext file extension to filter directory for
- */
-PatternList *pattern_load_patternlist(char *dirname, char *ext) {
-
-    PatternList li = {
-        .len = 0,
-        .patterns = NULL
-    };
-    PatternList *list = &li;
-
-    // note just initializing patterns here, proper sizing with realloc in pattern_read_dir
-    Pattern **patterns = (Pattern **) malloc(sizeof(Pattern *));
-
-    if(patterns == NULL) {
-        fprintf(stderr, "Unable to allocate memory for patterns.\n");
-        return NULL;
-    }
-
-    int len =  pattern_read_dir(dirname, ext, &patterns);
-    if (len < 0) {
-        fprintf(stderr, " pattern_read_dir: Unable able to read dir (%s).\n", dirname);
-    }
-
-    for(int i = 0; i < len; i++) {
-        printf("- pattern %d\n", i);
-        pattern_print_pattern(patterns[i]);
-    }
 
     return list;
 }
