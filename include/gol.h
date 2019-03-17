@@ -2,6 +2,9 @@
  * definitions for Game of Live data
  */
 
+#ifndef __GOL_H__
+#define __GOL_H__
+
 #define GOL_DEAD '.' /** defines value for a dead cell */
 #define GOL_ALIVE 'O' /** defines value for a living cell */
 
@@ -22,3 +25,5 @@ void gol_update(char *world, int cols, int rows);
 
 int gol_col(int index, int row, int cols);
 int gol_row(int index, int cols);
+
+#endif

@@ -2,6 +2,9 @@
  * Interface for rendering methods
  */
 
+#ifndef __PAINT_H__
+#define __PAINT_H__
+
 /**
  * initialize renderer
  */
@@ -37,3 +40,4 @@ void paint_loop_end(int cols, int rows);
  */
 void paint_exit(int cols, int rows);
 
+#endif
