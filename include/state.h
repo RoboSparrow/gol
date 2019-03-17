@@ -2,8 +2,8 @@
  * definitions for app state
  */
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef __STATE_H__
+#define __STATE_H__
 
 #define UNIT_SIZE 10
 

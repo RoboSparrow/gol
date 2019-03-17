@@ -32,10 +32,7 @@ int main(int argc, char* argv[]) {
 
     // init world meta
     Pattern *meta = pattern_allocate_pattern();
-    if (meta == NULL) {
-        // todo macro EXIT_NULL(meta, message)
-        return EXIT_FAILURE;
-    }
+    EXIT_NULL(meta, "could not allocate memory(1) for world pattern");
 
     // merge args
     Path patternfile = "";
@@ -46,9 +43,7 @@ int main(int argc, char* argv[]) {
 
     // init world data
     char *world = gol_allocate_data(cols, rows);
-    if (world == NULL) {
-        return EXIT_FAILURE;
-    }
+    EXIT_NULL(meta, "could not allocate memory(2) for world pattern");
 
     if(strlen(patternfile) == 0) {
         // random world
