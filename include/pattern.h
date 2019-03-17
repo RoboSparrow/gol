@@ -8,12 +8,20 @@
 
 #ifndef PATTERN_GUARD
 #define PATTERN_GUARD
+typedef enum {
+    PATTERN_NONE,
+    PATTERN_META,
+    PATTERN_FULL,
+} pattern_state;
+
 typedef struct pattern {
     char title[LINE_BOUNDS];
     char description[LINE_BOUNDS];
     Path file;
     int cols;
     int rows;
+    pattern_state state;
+    char *data;
 } Pattern;
 
 typedef struct patternList {

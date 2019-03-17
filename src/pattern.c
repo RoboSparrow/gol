@@ -143,12 +143,17 @@ void pattern_print_pattern(Pattern *pattern) {
     if (pattern == NULL) {
         printf("- pattern is empty\n");
     }
-
+    // TODO into pattern.h
+    char *pattern_state_names[] = {
+        "NONE", "META", "FULL"
+    };
     printf("    |_ title: %s\n", pattern->title);
     printf("    |_ description: %s\n", pattern->description);
     printf("    |_ file: %s\n", pattern->file);
     printf("    |_ cols: %d\n", pattern->cols);
     printf("    |_ rows: %d\n", pattern->rows);
+    printf("    |_ state: %s\n", (pattern->state < 3) ? pattern_state_names[pattern->state] : "UNKNOWN");
+    printf("    |_ data: %s\n", pattern->data);
 }
 
 /**
