@@ -126,7 +126,7 @@ char *gol_allocate_data(int cols, int rows) {
     // prepare data
     size_t size = rows * cols * sizeof(char);
 
-    char *data = (char *)malloc(size);
+    char *data = malloc(size);
 
     if (data == NULL) {
         perror("Could not allocate enough memory for data.\n");

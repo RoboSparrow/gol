@@ -70,7 +70,7 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
 
     // allocate mem for patterns
     list->len = len;
-    list->patterns = (Pattern **) malloc(len * sizeof(Pattern *));
+    list->patterns = malloc(len * sizeof(Pattern *));
     if(list->patterns == NULL) {
         fprintf(stderr, "rle-parser: unable to re-allocate memory for patterns.\n");
         return NULL;
@@ -188,8 +188,8 @@ int pattern_merge_from_file(char *patternfile, char *ext, char *world, int cols,
             colOffset, rowOffset
         );
 
-        pattern_free_pattern(pattern);
         gol_free_data(data);
+        pattern_free_pattern(pattern);
 
         return size;
 }

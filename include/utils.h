@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define EXIT_NULL(val, message) if (val == NULL) fprintf(stderr, "fatal error: %s", message); exit(EXIT_FAILURE);
+#define EXIT_NULL(val, message) if (val == NULL) { fprintf(stderr, "fatal error: %s", message); exit(EXIT_FAILURE); }
 
 typedef char Path[PATH_MAX];
 
