@@ -62,7 +62,7 @@ int parse_comment(char *line, Pattern *pattern) {
             return 0;
         case 'C':
             // only consider first "c" line
-            if (strlen(pattern->description) > 0) {
+            if (pattern->description[0] == '\0') {
                 return 0;
             }
             strcpy(pattern->description, line);

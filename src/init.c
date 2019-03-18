@@ -2,15 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #include "pattern.h"
+#include "utils.h"
 
-// todo understand that
-void clean_buffer(){
-    int n;
-    while((n = getchar()) != EOF && n != '\n' );
-}
-
+/**
+ * helper input for init_parse_args -l
+ */
 int select_pattern(int len) {
     printf("--------------\n");
     int selected = 0;
@@ -24,7 +23,27 @@ int select_pattern(int len) {
     return selected;
 }
 
-void init_parse_args(int argc, char* argv[], Pattern *meta, Path patternfile) {
+/**
+ * Sets path to executable
+ */
+void init_set_rootdir(int argc, char* argv[], Path path) {
+    // TODO this needs to be made compatible for OS and runtime modes
+    if(*argv[0] == '/') {
+        strcpy(path, argv[0]);
+    } else {
+        realpath(argv[0], path);
+    }
+    strcpy(path, dirname(path));
+    if(access(path, R_OK)) {
+        fprintf(stderr, "init: could not define or access path to executable (%s)", path);
+    }
+}
+
+/**
+ * parses cli args in to world pattern
+ * @param param file path to be filled with file path on option -f
+ */
+void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
     int opt;
     int cols = 0;
     int rows = 0;
@@ -41,7 +60,7 @@ void init_parse_args(int argc, char* argv[], Pattern *meta, Path patternfile) {
             case 'l': {
                 PatternList *list = pattern_load_patternlist("patterns", "rle");
                 if(list == NULL) {
-                    fprintf(stderr, "unable to load pattern list");
+                    fprintf(stderr, "init: Unable to load pattern list");
                     exit(EXIT_FAILURE);
                 }
 
@@ -69,7 +88,7 @@ void init_parse_args(int argc, char* argv[], Pattern *meta, Path patternfile) {
         }
     }
 
-    meta->cols = (cols > 0) ? cols : 50;
-    meta->rows = (rows > 0) ? rows : meta->cols;
-    // pattern_print_pattern(meta);
+    world->cols = (cols > 0) ? cols : 50;
+    world->rows = (rows > 0) ? rows : world->cols;
+    // pattern_print_pattern(world);
 }

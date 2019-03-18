@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <SDL2/SDL.h>
-#include <libgen.h>
 
 #include "utils.h"
 #include "gol.h"
@@ -19,32 +18,25 @@ int main(int argc, char* argv[]) {
 
     int running = 1;
     int paused = 0;
+    Path patternfile = "";
+    SDL_Event e;
 
-    // root dir
-    // TODO this needs to be made os and runtime compatible
-    if(*argv[0] == '/') {
-        strcpy(FS_ROOT_DIR, argv[0]);
-    } else {
-        realpath(argv[0], FS_ROOT_DIR);
-    }
-    dirname(FS_ROOT_DIR);
+    // root dir, TODO this needs to be made compatible for OS and runtime modes
+    init_set_rootdir(argc, argv, FS_ROOT_DIR);
 
     // init world meta
     Pattern *world = pattern_allocate_pattern();
     EXIT_NULL(world, "could not allocate memory(1) for world pattern");
 
     // merge args
-    Path patternfile = "";
     init_parse_args(argc, argv, world, patternfile);
 
-    int cols = world->cols;
-    int rows = world->rows;
-
     // init world data
-    world->data = gol_allocate_data(cols, rows);
+    world->data = gol_allocate_data(world->cols, world->rows);
     EXIT_NULL(world->data, "could not allocate memory(2) for world pattern");
 
-    if(strlen(patternfile) == 0) {
+    // populate world
+    if(patternfile[0] == '\0') {
         // random world
         gol_init(world->data, world->cols, world->rows);
     } else {
@@ -56,7 +48,6 @@ int main(int argc, char* argv[]) {
     }
 
     paint_init(world->cols, world->rows);
-    SDL_Event e;
 
     // add a small delay so that return key event from cli is not captured
     // TODO use var
