@@ -15,7 +15,7 @@ int select_pattern(int len) {
     int selected = 0;
     int cl;
     do {
-        printf("select pattern:");
+        printf("select pattern: ");
         scanf("%d", &selected);
         while((cl = getchar()) != EOF && cl != '\n'); //clean the buffer
 
@@ -48,7 +48,7 @@ void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
     int cols = 0;
     int rows = 0;
 
-    char usage[] = "usage: %s [-c numberofcols] [-r numberofrows] [-p patternfile]\n";
+    char usage[] = "usage: %s [-l listpatternsandselect] [-c numberofcols] [-r numberofrows] [-p pathtopatternfile]\n";
     while ((opt = getopt (argc, argv, "r:c:p:h:l")) != -1) {
         switch (opt)  {
             case 'c':
@@ -70,7 +70,7 @@ void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
                 }
                 int selected = select_pattern(list->len);
 
-                printf("%s\n", list->patterns[selected]->file);
+                printf("=> %s\n", list->patterns[selected]->file);
                 strcpy(patternfile, list->patterns[selected]->file);
 
                 pattern_free_patternlist(list);
