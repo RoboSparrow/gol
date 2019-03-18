@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     // populate world
     if(patternfile[0] == '\0') {
         // random world
-        gol_init(world->data, world->cols, world->rows);
+        gol_random(world);
     } else {
         // pattern from file
         int merged = pattern_merge_from_file(patternfile, "rle",  world->data, world->cols, world->rows, 2, 2);
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
                         SDL_Delay(200);
                             if(strlen(patternfile) == 0) {
                                 // random world
-                                gol_init(world->data, world->cols, world->rows);
+                                gol_random(world);
                             } else {
                                 // pattern from file
                                 gol_clear_data(world->data);
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 
         if (!paused) {
             paint_loop_start(world->cols, world->rows);
-            gol_update(world->data, world->cols, world->rows);
+            gol_update(world);
             paint_loop_end(world->cols, world->rows);
         }
 

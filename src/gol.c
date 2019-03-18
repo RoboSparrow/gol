@@ -7,6 +7,7 @@
 
 #include "gol.h"
 #include "paint.h"
+#include "pattern.h"
 
 int gol_row(int index, int cols) {
     int row;
@@ -63,9 +64,9 @@ void col_get_cluster(int ns[], int index, int cols, int rows) {
  *  Any live cell with more than three live neighbors dies, as if by overpopulation.
  *  Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
  */
-int gol_update_cell(char *world, int index, int cols, int rows) {
+int gol_update_cell(char *data, int index, int cols, int rows) {
 
-    char cell = world[index];
+    char cell = data[index];
     int health = 0;
     int neighbours[GOL_CLUSTER_SIZE] = {-1};
 
@@ -75,7 +76,7 @@ int gol_update_cell(char *world, int index, int cols, int rows) {
         int nindex = neighbours[n];
 
         if(nindex > -1 && n != 4) {
-            health += (world[nindex] == GOL_ALIVE) ? 1 : 0;
+            health += (data[nindex] == GOL_ALIVE) ? 1 : 0;
         }
     }
 
@@ -88,32 +89,39 @@ int gol_update_cell(char *world, int index, int cols, int rows) {
     return cell;
 }
 
-void gol_update(char *world, int cols, int rows) {
+/**
+ *  A day in world history. Updates world data matrix according to gol rules.
+ */
+void gol_update(Pattern *world) {
+    int cols = world->cols;
+    int rows = world->rows;
+    char *data = world->data;
+
     int size = cols * rows;
     char out[size];
-
     for (int i = 0; i < size; i++) {
-        int cell = gol_update_cell(world, i, cols, rows);
+        // update
+        int cell = gol_update_cell(data, i, cols, rows);
+        // render
         paint_loop_cell(cell, i, cols, rows);
-
+        // cache
         out[i] = cell;
         if((i + 1) % cols == 0) {
             paint_loop_row_end();
         }
     }
-    memcpy(world, out, strlen(world));
-/*
-    for (int i = 0; i < size; i++) {
-       world [i] = out[i];
-    }
-*/
+    memcpy(data, out, strlen(data));
 }
 
-void gol_init(char *world, int cols, int rows) {
+/**
+ * Populates world data matrix with a random pattern
+ */
+void gol_random(Pattern *world) {
     srand(time(NULL));
-    int size = cols * rows;
+    int size = world->cols * world->rows;
+    char *data = world->data;
     for (int i = 0; i < size; i++) {
-       world[i] = (rand() % 2) ? GOL_ALIVE : GOL_DEAD;
+       data[i] = (rand() % 2) ? GOL_ALIVE : GOL_DEAD;
     }
 }
 
