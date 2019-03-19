@@ -126,7 +126,7 @@ int parse_header(char *line, Pattern *pattern) {
  * @param data data matrix (1D char array)
  * @return 0 on success >= 1 if parsing error
  */
-int parse_data_row(char *row, int rowOffset, Pattern *pattern, char *data) {
+int parse_data_row(char *row, int rowOffset, Pattern *pattern) {
 
     int index = rowOffset * pattern->cols;
     int len = strlen(row);
@@ -160,7 +160,7 @@ int parse_data_row(char *row, int rowOffset, Pattern *pattern, char *data) {
             char cell = (row[i] == REL_CELL_DEAD) ? GOL_DEAD : GOL_ALIVE;
             // printf("---> %d -, amount %d: cell %d \n", index, amount, cell);
             for(int k = 0; k < amount; k++) {
-                data[index] = cell;
+                pattern->data[index] = cell;
                 //printf("#%d: %c %d\n", index, cell, pattern->data[index]);
                 index++;
             }
@@ -178,11 +178,10 @@ int parse_data_row(char *row, int rowOffset, Pattern *pattern, char *data) {
  * @see http://www.conwaylife.com/wiki/RLE
  *
  * @param fp FILE pointer
- * @param pattern Pattern struct
- * @param data ready allocated data matrix filled with GOL_CELL_DEAD values (1D char array)
+ * @param pattern Pattern struct with alredy ready allocated data matrix filled with GOL_CELL_DEAD values (1D char array)
  * @return 0 on success >= 1 if parsing error
  */
-int parse_data(FILE *fp, Pattern *pattern, char *data) {
+int parse_data(FILE *fp, Pattern *pattern) {
     //int len = pattern->rows * pattern->cols;
     int i = 0;
     int rowIndex = 0;
@@ -199,7 +198,7 @@ int parse_data(FILE *fp, Pattern *pattern, char *data) {
 
         if(ch == REL_EOROW || ch == REL_EOPATT) {
             row[i] = '\0';
-            parse_data_row(row, rowIndex, pattern, data);
+            parse_data_row(row, rowIndex, pattern);
             row[0] = '\0'; // clear
             i = 0;
             rowIndex++;
@@ -227,25 +226,18 @@ int parse_data(FILE *fp, Pattern *pattern, char *data) {
  * You must call this before calling rle_load_data()
  * @see http://www.conwaylife.com/wiki/RLE
  *
- * @param filepath path to RLE file
+ * @param fp valid(!) file pointer to rle file
  * @param pattern Pattern struct
  * @return 0 on success >= 1 if parsing error
  */
-int rle_load_meta(char *filepath, Pattern *pattern) {
-    FILE *fp;
-
-    fp = fopen(filepath, "r");
-
-    if (fp == NULL) {
-        perror("Error while opening the file.\n");
-        return -1;
-    }
+int rle_load_meta(FILE *fp, Pattern *pattern) {
+    // make sure we are on top of file
+    rewind(fp);
 
     // store filepath
-    strcpy(pattern->file, filepath);
+
     char identifier;
     for (int i = 0; 1; i++) {
-
         // EOF
         char line[LINE_BOUNDS];
 
@@ -264,11 +256,10 @@ int rle_load_meta(char *filepath, Pattern *pattern) {
 
         // header line: there is eact 1 header line foolwed by data lines.
         // stop line reading and continue read data char-by-char
-        if (identifier == 'x') {
+        if (identifier == 'x' || identifier == 'y') {
             if (parse_header(line, pattern)) {
                 fprintf(stderr, "rle-parser: Unable able to parse header line (%d).\n", i);
             }
-
             break;
         }
     }
@@ -280,7 +271,6 @@ int rle_load_meta(char *filepath, Pattern *pattern) {
         return 0;
     }
 
-    fclose(fp);
     return 0;
 }
 
@@ -288,6 +278,7 @@ int rle_load_meta(char *filepath, Pattern *pattern) {
  * Load RLE meta data into a given pattern struct
  * This function depends on a valid Pattern data, typically provided by rle_load_meta()
  * @see http://www.conwaylife.com/wiki/RLE
+ * @param fp valid(!) file pointer to rle file
  * @param pattern Pattern struct, populated with valid values for these propetries
  *  - file"
  *  - cols"
@@ -295,22 +286,14 @@ int rle_load_meta(char *filepath, Pattern *pattern) {
  * @param data ready allocated data matrix filled with GOL_CELL_DEAD values (1D char array)
  * @return 0 on success >= 1 if parsing error
  */
-int rle_load_data(Pattern *pattern, char *data) {
-
-    FILE *fp;
-
-    fp = fopen(pattern->file, "r");
-
-    if (fp == NULL) {
-
-        fprintf(stderr, "Error while opening the file.\n");
-        return -1;
-    }
+int rle_load_data(FILE *fp, Pattern *pattern) {
+    rewind (fp);// TODO this should not be neccessary
 
     int i = 0;
     char identifier;
-    for (i = 0; 1; i++) {
 
+    // scan through non-data lines
+    for (i = 0; 1; i++) {
         // EOF
         char line[LINE_BOUNDS];
 
@@ -319,48 +302,64 @@ int rle_load_data(Pattern *pattern, char *data) {
         }
 
         identifier = tolower(line[0]);
-
         if (identifier == REL_COMMENT_FLAG) {
             continue;
         }
 
         // header line: there is eact 1 header line foolwed by data lines.
         // stop line reading and continue read data char-by-char
-        if (identifier == 'x') {
+        if (identifier == 'x' || identifier == 'y') {
             break;
         }
     }
 
-    if (parse_data(fp, pattern, data)) {
+    if (parse_data(fp, pattern)) {
         fprintf(stderr, "rle-parser: Unable able to parse data\n");
         // exit(EXIT_FAILURE);
     }
-
-    fclose(fp);
 
     return 0;
 }
 
 
-char *rle_load_pattern(char *file, Pattern *pattern) {
+pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_state) {
+    // always
+    strcpy(pattern->file, file);
 
-    int loaded  = rle_load_meta(file, pattern);
+    FILE *fp;
+    fp = fopen(file, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "Error while opening the file.\n");
+        return PATTERN_NONE;
+    }
+
+    int loaded  = rle_load_meta(fp, pattern);
     if(loaded < 0) {
         fprintf(stderr,"error loading pattern file meta %s\n", file);
-        return NULL;
+        fclose(fp);
+        return PATTERN_NONE;
+    }
+    pattern->state = PATTERN_META;
+
+    if(targ_state == PATTERN_META) {
+        return pattern->state;
     }
 
-    char *data = gol_allocate_data(pattern->cols, pattern->rows);
-    if(data == NULL) {
+    pattern->data = gol_allocate_data(pattern->cols, pattern->rows);
+    if(pattern->data == NULL) {
         fprintf(stderr, "pattern_merge: error allocating memory for data");
-        return NULL;
+        fclose(fp);
+        return PATTERN_NONE;
     }
 
-    int parsed = rle_load_data(pattern, data);
+    int parsed = rle_load_data(fp, pattern);
     if(parsed < 0) {
         fprintf(stderr, "error loading pattern file data %s\n", file);
-        return NULL;
+        fclose(fp);
+        return PATTERN_NONE;
     }
+    pattern->state = PATTERN_FULL;
 
-    return data;
+    fclose(fp);
+    return pattern->state;
 }

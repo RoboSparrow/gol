@@ -88,13 +88,13 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
                 strcat(pattern->file, "/");
                 strcat(pattern->file, e->d_name);
 
-                int loaded  = 0;
+                pattern_state loaded;
                 // insert parser of choice here
                 if (strcmp(ext, "rle") == 0) {
-                    loaded = rle_load_meta(pattern->file, pattern);
+                    loaded = rle_load_pattern(pattern->file, pattern, PATTERN_META);
                 }
 
-                if(loaded < 0) {
+                if(loaded != PATTERN_META) {
                     fprintf(stderr, "error loading pattern file %s\n", pattern->file);
                 } else {
                     list->patterns[i] = pattern;
@@ -153,12 +153,15 @@ void pattern_print_pattern(Pattern *pattern) {
     printf("    |_ cols: %d\n", pattern->cols);
     printf("    |_ rows: %d\n", pattern->rows);
     printf("    |_ state: %s\n", (pattern->state < 3) ? pattern_state_names[pattern->state] : "UNKNOWN");
-    printf("    |_ data: %s\n", pattern->data);
+    if(pattern->data) {
+        printf("    |_ data: ");
+        gol_print_data(pattern->data, pattern->cols, pattern->rows);
+    }
 }
 
 /**
  * Load pattern from file and merge into given world
- * @param patternfile file to load
+ * @param file file to load
  * @param ext file extension, flags parser to invoke
  * @param world target data matrix to merge into
  * @param cols target data matrix width
@@ -167,7 +170,7 @@ void pattern_print_pattern(Pattern *pattern) {
  * @param rowOffset y-offset target data matrix
  * @return -1 on error, else length of merged pattern data
  */
-int pattern_merge_from_file(char *patternfile, char *ext, Pattern *world, int colOffset, int rowOffset) {
+int pattern_merge_from_file(char *file, char *ext, Pattern *world, int colOffset, int rowOffset) {
         // pattern from file
         Pattern *pattern = pattern_allocate_pattern();
         if(pattern == NULL) {
@@ -175,10 +178,8 @@ int pattern_merge_from_file(char *patternfile, char *ext, Pattern *world, int co
         }
 
         // todo switch ext
-        pattern->data = rle_load_pattern(patternfile, pattern);
-        int size = pattern->cols * pattern->rows;
-
-        if(pattern->data == NULL) {
+        pattern_state state = rle_load_pattern(file, pattern, PATTERN_FULL);
+        if(state != PATTERN_FULL) {
             return -1;
         }
 
@@ -186,6 +187,5 @@ int pattern_merge_from_file(char *patternfile, char *ext, Pattern *world, int co
 
         gol_free_data(pattern->data);
         pattern_free_pattern(pattern);
-
-        return size;
+        return state;
 }

@@ -8,8 +8,6 @@
 
 #include "pattern.h"
 
-int rle_load_meta(char *file_name, Pattern *pattern);
-int rle_load_data(Pattern *pattern, char *data);
-char *rle_load_pattern(char *file, Pattern *pattern);
+pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_state);
 
 #endif

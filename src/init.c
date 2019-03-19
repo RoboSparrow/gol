@@ -10,6 +10,16 @@
 /**
  * helper input for init_parse_args -l
  */
+void cli_print_patternlist(PatternList *list) {
+    for(int i = 0; i < list->len; i++) {
+        printf("%d) %s (%dx%d)\n", i, list->patterns[i]->title, list->patterns[i]->cols, list->patterns[i]->rows);
+        printf("    * %s\n", list->patterns[i]->description);
+    }
+}
+
+/**
+ * helper input for init_parse_args -l
+ */
 int select_pattern(int len) {
     printf("--------------\n");
     int selected = 0;
@@ -63,11 +73,8 @@ void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
                     fprintf(stderr, "init: Unable to load pattern list");
                     exit(EXIT_FAILURE);
                 }
+                cli_print_patternlist(list);
 
-                for(int i = 0; i < list->len; i++) {
-                    printf("- %d\n", i);
-                    pattern_print_pattern(list->patterns[i]);
-                }
                 int selected = select_pattern(list->len);
 
                 printf("=> %s\n", list->patterns[selected]->file);
