@@ -47,5 +47,6 @@ assets:
 
 clean:
 	$(RM) $(OBJ)
+	$(RM) bin/patterns/*
 
 # Based on the excellent walkthroughs by [Chnossos](https://stackoverflow.com/a/30602701) and [John Tsiombikas](http://nuclear.mutantstargoat.com/articles/make)
