@@ -41,11 +41,14 @@ int main(int argc, char* argv[]) {
         // random world
         gol_random(world);
     } else {
-        // pattern from file
-        int merged = pattern_merge_from_file(patternfile, "rle",  world, 2, 2);
-        if(merged <= 0) {
-            return EXIT_FAILURE;
-        }
+        Pattern *pattern = pattern_allocate_pattern();
+        EXIT_NULL(world, "main: could not allocate memory for pattern file\n");
+
+        int loaded = pattern_load_file(patternfile, pattern, PATTERN_FULL);
+        EXIT_MINUS(loaded, "main: could not load pattern file\n");
+        gol_merge_data(pattern, world, (world->cols - pattern->cols) / 2, (world->rows - pattern->rows) / 2);
+        gol_free_data(pattern->data);
+        pattern_free_pattern(pattern);
     }
 
     paint_init(world->cols, world->rows);
@@ -78,7 +81,15 @@ int main(int argc, char* argv[]) {
                             } else {
                                 // pattern from file
                                 gol_clear_data(world->data);
-                                pattern_merge_from_file(patternfile, "rle", world, 2, 2); // not checking for failure again
+
+                                Pattern *pattern = pattern_allocate_pattern();
+                                EXIT_NULL(world, "main: could not allocate memory for pattern file\n");
+
+                                int loaded = pattern_load_file(patternfile, pattern, PATTERN_FULL);
+                                EXIT_MINUS(loaded, "main: could not load pattern file\n");
+                                gol_merge_data(pattern, world, (world->cols - pattern->cols) / 2, (world->rows - pattern->rows) / 2);
+                                gol_free_data(pattern->data);
+                                pattern_free_pattern(pattern);
                             }
                     break;
                 }
@@ -89,6 +100,7 @@ int main(int argc, char* argv[]) {
             paint_loop_start(world->cols, world->rows);
             gol_update(world);
             paint_loop_end(world->cols, world->rows);
+            // exit(0); // DEV valgrind with SDL
         }
 
         SDL_Delay(50); // 15 fps

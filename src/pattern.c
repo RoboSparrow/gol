@@ -162,30 +162,26 @@ void pattern_print_pattern(Pattern *pattern) {
 /**
  * Load pattern from file and merge into given world
  * @param file file to load
- * @param ext file extension, flags parser to invoke
- * @param world target data matrix to merge into
- * @param cols target data matrix width
- * @param cols target data matrix height
- * @param colOffset x-offset target data matrix
- * @param rowOffset y-offset target data matrix
+ * @param pattern allocated Pattern to load into
+ * @param targ_state flag, which level data should be loaded
  * @return -1 on error, else length of merged pattern data
  */
-int pattern_merge_from_file(char *file, char *ext, Pattern *world, int colOffset, int rowOffset) {
-        // pattern from file
-        Pattern *pattern = pattern_allocate_pattern();
-        if(pattern == NULL) {
+int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
+    // todo path_build?
+    char *ext = str_getfileext(file);
+
+    Path path;
+    path_build(file, path);
+    pattern->state = PATTERN_NONE;
+
+    if (strcmp(ext, "rle") == 0) {
+        pattern_state state = rle_load_pattern(file, pattern, targ_state);
+        if(state != targ_state) {
             return -1;
         }
+        return 0;
+    }
 
-        // todo switch ext
-        pattern_state state = rle_load_pattern(file, pattern, PATTERN_FULL);
-        if(state != PATTERN_FULL) {
-            return -1;
-        }
-
-        gol_merge_data(pattern, world, colOffset, rowOffset);
-
-        gol_free_data(pattern->data);
-        pattern_free_pattern(pattern);
-        return state;
+    fprintf(stderr, "No parser found for file %s\n", file);
+    return -1;
 }

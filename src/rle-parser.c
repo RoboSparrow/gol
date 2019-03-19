@@ -328,11 +328,13 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
 
     FILE *fp;
     fp = fopen(file, "r");
+
     if (fp == NULL) {
         fprintf(stderr, "Error while opening the file.\n");
         return PATTERN_NONE;
     }
 
+    // ...meta
     int loaded  = rle_load_meta(fp, pattern);
     if(loaded < 0) {
         fprintf(stderr,"error loading pattern file meta %s\n", file);
@@ -345,6 +347,7 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
         return pattern->state;
     }
 
+    // ...data
     pattern->data = gol_allocate_data(pattern->cols, pattern->rows);
     if(pattern->data == NULL) {
         fprintf(stderr, "pattern_merge: error allocating memory for data");

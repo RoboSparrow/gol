@@ -36,8 +36,9 @@ void pattern_free_patternlist(PatternList *list);
 
 Pattern *pattern_allocate_pattern();
 void pattern_free_pattern(Pattern *pattern);
+
+void pattern_copy_pattern(Pattern *src, Pattern *targ);
 void pattern_print_pattern(Pattern *pattern);
 
-int pattern_merge_from_file(char *patternfile, char *ext, Pattern *world, int colOffset, int rowOffset);
-
+int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state);
 #endif
