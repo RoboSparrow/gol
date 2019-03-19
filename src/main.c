@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
         gol_random(world);
     } else {
         // pattern from file
-        int merged = pattern_merge_from_file(patternfile, "rle",  world->data, world->cols, world->rows, 2, 2);
+        int merged = pattern_merge_from_file(patternfile, "rle",  world, 2, 2);
         if(merged <= 0) {
             return EXIT_FAILURE;
         }
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
                             } else {
                                 // pattern from file
                                 gol_clear_data(world->data);
-                                pattern_merge_from_file(patternfile, "rle", world->data, world->cols, world->rows, 2, 2); // not checking for failure again
+                                pattern_merge_from_file(patternfile, "rle", world, 2, 2); // not checking for failure again
                             }
                     break;
                 }

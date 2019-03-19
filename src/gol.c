@@ -169,35 +169,36 @@ void gol_free_data(char *data) {
  * merge data matrix src into data matrix targ
  * should src offset + width extend the targ with src will be cut off,same applies for targ height
  * psrc can be placed into targ with an x and y offset
- * @param *src pointer to source data matrix (1D char array)
- * @param scols source data matrix width
- * @param srows source data matrix height
- * @param *targ pointer to target data matrix (1D char array)
- * @param tcols target data matrix width
- * @param trows target data matrix height
+ * @param *src pointer to source Pattern
+ * @param *targ pointer to target Pattern
  * @param offsetcols target x-offset, number of columns
  * @param offsetrows target y-offset, number of rows
  */
-void gol_merge_data(
-    char *src, int scols, int srows,
-    char *targ, int tcols, int trows,
-    int offsetcols, int offsetrows
-) {
+void gol_merge_data(Pattern *src, Pattern *targ, int offset_cols, int offset_rows) {
     int index;
-    for (int r = 0; r < srows; r++) {
+
+    int s_rows = src->rows;
+    int s_cols = src->cols;
+    char *s_data = src->data;
+
+    int t_rows = targ->rows;
+    int t_cols = targ->cols;
+    char *t_data = targ->data;
+
+    for (int r = 0; r < s_rows; r++) {
         // boundary
-        if (offsetrows + r > trows) {
+        if (offset_rows + r > t_rows) {
             break;
         }
-        index = (r + offsetrows) * tcols + offsetcols;
+        index = (r + offset_rows) * t_cols + offset_cols;
 
-        for (int c = 0; c < scols; c++) {
+        for (int c = 0; c < s_cols; c++) {
             // boundary
-            if (offsetcols + c > tcols) {
+            if (offset_cols + c > t_cols) {
                 break;
             }
-            int offset = (r * scols) + c;
-            targ[index] = src[offset];
+            int offset = (r * s_cols) + c;
+            t_data[index] = s_data[offset];
 
             index++;
         }

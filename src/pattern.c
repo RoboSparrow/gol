@@ -167,28 +167,24 @@ void pattern_print_pattern(Pattern *pattern) {
  * @param rowOffset y-offset target data matrix
  * @return -1 on error, else length of merged pattern data
  */
-int pattern_merge_from_file(char *patternfile, char *ext, char *world, int cols, int rows, int colOffset, int rowOffset) {
+int pattern_merge_from_file(char *patternfile, char *ext, Pattern *world, int colOffset, int rowOffset) {
         // pattern from file
         Pattern *pattern = pattern_allocate_pattern();
         if(pattern == NULL) {
             return -1;
         }
-        char *data = NULL;
+
         // todo switch ext
-        data = rle_load_pattern(patternfile, pattern);
+        pattern->data = rle_load_pattern(patternfile, pattern);
         int size = pattern->cols * pattern->rows;
 
-        if(data == NULL) {
+        if(pattern->data == NULL) {
             return -1;
         }
 
-        gol_merge_data(
-            data, pattern->cols, pattern->rows,
-            world, cols, rows,
-            colOffset, rowOffset
-        );
+        gol_merge_data(pattern, world, colOffset, rowOffset);
 
-        gol_free_data(data);
+        gol_free_data(pattern->data);
         pattern_free_pattern(pattern);
 
         return size;

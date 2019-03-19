@@ -15,7 +15,7 @@ void gol_free_data(char *data);
 void gol_clear_data(char *data);
 void gol_print_data(char *data, int cols, int rows);
 
-void gol_merge_data(char *src, int scols, int srows, char *targ, int tcols, int trows, int offsetcols, int offsetrows);
+void gol_merge_data(Pattern *src, Pattern *targ, int offset_cols, int offset_rows);
 
 // 0   1   2
 // 3  [4]  5
