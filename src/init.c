@@ -54,7 +54,7 @@ void init_set_rootdir(int argc, char* argv[], Path path) {
  * @param param file path to be filled with file path on option -f
  */
 void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
-    int opt;
+    int opt = 0;
     int cols = 0;
     int rows = 0;
 

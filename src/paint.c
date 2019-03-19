@@ -23,8 +23,8 @@ int font_size = 10;
 
 
 void draw_background(int cols, int rows) {
-    int w;
-    int h;
+    int w = 0;
+    int h = 0;
     SDL_RenderGetLogicalSize(renderer, &w, &h);
 
     int ws = w / cols;
@@ -161,8 +161,8 @@ void paint_loop_row_end() {}
 
 void paint_loop_end(int cols, int rows) {
 
-    int rw;
-    int rh;
+    int rw = 0;
+    int rh = 0;
     SDL_GetRendererOutputSize(renderer, &rw, &rh);
     SDL_Rect text_rect = render_text("press enter for restart, space for pause");//TODO daw only once and cache
     text_rect.x = (rw - text_rect.w) / 2;

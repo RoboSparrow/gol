@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
 
     int running = 1;
     int paused = 0;
+
     Path patternfile = "";
     SDL_Event e;
 

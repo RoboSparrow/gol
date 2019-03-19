@@ -10,13 +10,13 @@
 #include "pattern.h"
 
 int gol_row(int index, int cols) {
-    int row;
+    int row = 0;
     row = (int) index / cols;
     return row;
 }
 
 int gol_col(int index, int row, int cols) {
-    int col;
+    int col = 0;
     col = index - (row * cols);
     return col;
 }
@@ -175,7 +175,7 @@ void gol_free_data(char *data) {
  * @param offsetrows target y-offset, number of rows
  */
 void gol_merge_data(Pattern *src, Pattern *targ, int offset_cols, int offset_rows) {
-    int index;
+    int index = 0;
 
     int s_rows = src->rows;
     int s_cols = src->cols;
