@@ -249,7 +249,7 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
 
         if (identifier == REL_COMMENT_FLAG) {
             if (parse_comment(line, pattern)) {
-                fprintf(stderr, "rle-parser: Unable able to parse comment line (%d).\n", i);
+                LOG_ERROR_F("rle-parser: Unable able to parse comment line (%d).", i);
             }
             continue;
         }
@@ -258,7 +258,7 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
         // stop line reading and continue read data char-by-char
         if (identifier == 'x' || identifier == 'y') {
             if (parse_header(line, pattern)) {
-                fprintf(stderr, "rle-parser: Unable able to parse header line (%d).\n", i);
+                LOG_ERROR_F("rle-parser: Unable able to parse header line (%d).", i);
             }
             break;
         }
@@ -266,7 +266,6 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
 
     // entering data section
     if (isdigit(identifier) || identifier == REL_CELL_ALIVE || identifier == REL_CELL_DEAD) {
-        printf("entering data, skip");
         fclose(fp);
         return 0;
     }
@@ -314,7 +313,7 @@ int rle_load_data(FILE *fp, Pattern *pattern) {
     }
 
     if (parse_data(fp, pattern)) {
-        fprintf(stderr, "rle-parser: Unable able to parse data\n");
+        LOG_ERROR("rle-parser: Unable able to parse data.");
         // exit(EXIT_FAILURE);
     }
 
@@ -326,18 +325,17 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
     // always
     strcpy(pattern->file, file);
 
-    FILE *fp;
-    fp = fopen(file, "r");
+    FILE *fp = fopen(file, "r");
 
     if (fp == NULL) {
-        fprintf(stderr, "Error while opening the file.\n");
+        LOG_ERROR_F("Error while opening the file fir %s.", file);
         return PATTERN_NONE;
     }
 
     // ...meta
     int loaded  = rle_load_meta(fp, pattern);
     if(loaded < 0) {
-        fprintf(stderr,"error loading pattern file meta %s\n", file);
+        LOG_ERROR_F("error loading pattern file meta %s.", file);
         fclose(fp);
         return PATTERN_NONE;
     }
@@ -350,14 +348,14 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
     // ...data
     pattern->data = gol_allocate_data(pattern->cols, pattern->rows);
     if(pattern->data == NULL) {
-        fprintf(stderr, "pattern_merge: error allocating memory for data");
+        LOG_ERROR("error allocating memory for data.");
         fclose(fp);
         return PATTERN_NONE;
     }
 
     int parsed = rle_load_data(fp, pattern);
     if(parsed < 0) {
-        fprintf(stderr, "error loading pattern file data %s\n", file);
+        LOG_ERROR_F("error loading pattern file data %s.", file);
         fclose(fp);
         return PATTERN_NONE;
     }
@@ -365,4 +363,48 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
 
     fclose(fp);
     return pattern->state;
+}
+
+int rle_save_pattern(Path file, Pattern *pattern) {
+
+    FILE *fp = fopen(file, "w");
+
+    if (fp == NULL) {
+        LOG_ERROR("Error while opening the file.");
+        return -1;
+    }
+
+    int cols  = pattern->cols;
+    int rows  = pattern->rows;
+    char *data  = pattern->data;
+
+    fprintf(fp, "#N %s\n", pattern->title);
+    fprintf(fp, "#C %s\n", pattern->description);
+    fprintf(fp, "x = %d, y = %d\n", pattern->cols, pattern->rows);
+
+    char last = REL_CELL_DEAD;
+    char count = 0;
+    char cell;
+    for (int r = 0; r < rows; r++) {
+        count = 0;
+        for (int c = 0; c < cols; c++) {
+            int offset = (r * cols) + c;
+            count++;
+            cell = (data[offset] == GOL_ALIVE) ? REL_CELL_ALIVE : REL_CELL_DEAD;
+            if (cell != last) {
+                fprintf(fp, "%d%c", count, last);
+                count = 0;
+                last = cell;
+            }
+        }
+        // line was filled with same cells
+        if (count == cols) {
+            fprintf(fp, "%d%c", count, last);
+        }
+        fprintf(fp, (r < rows -1) ? "$" : "!");
+    }
+
+    fclose(fp);
+
+    return 0;
 }

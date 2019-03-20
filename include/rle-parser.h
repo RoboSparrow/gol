@@ -9,5 +9,5 @@
 #include "pattern.h"
 
 pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_state);
-
+int rle_save_pattern(Path file, Pattern *pattern);
 #endif

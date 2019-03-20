@@ -13,7 +13,7 @@
 Pattern *pattern_allocate_pattern() {
     Pattern *pattern = calloc(1, sizeof(Pattern));
     if (pattern == NULL) {
-        fprintf(stderr, "Could not allocate enough memory for pattern.\n");
+        LOG_ERROR("Could not allocate enough memory for pattern.");
         return pattern;
     }
     return pattern;
@@ -52,7 +52,7 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
 
     dir = opendir(path);
     if(dir == NULL) {
-        fprintf(stderr, "rle-parser: Unable able to open dir %s.\n", path);
+        LOG_ERROR_F("Unable able to open dir %s.", path);
         return NULL;
     }
 
@@ -72,7 +72,7 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
     list->len = len;
     list->patterns = malloc(len * sizeof(Pattern *));
     if(list->patterns == NULL) {
-        fprintf(stderr, "rle-parser: unable to re-allocate memory for patterns.\n");
+        LOG_ERROR("rle-parser: unable to re-allocate memory for patterns.");
         return NULL;
     }
 
@@ -95,7 +95,7 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
                 }
 
                 if(loaded != PATTERN_META) {
-                    fprintf(stderr, "error loading pattern file %s\n", pattern->file);
+                    LOG_ERROR_F("error loading pattern file %s", pattern->file);
                 } else {
                     list->patterns[i] = pattern;
                     i++;
@@ -160,7 +160,7 @@ void pattern_print_pattern(Pattern *pattern) {
 }
 
 /**
- * Load pattern from file and merge into given world
+ * Load pattern from file
  * @param file file to load
  * @param pattern allocated Pattern to load into
  * @param targ_state flag, which level data should be loaded
@@ -182,6 +182,27 @@ int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
         return 0;
     }
 
-    fprintf(stderr, "No parser found for file %s\n", file);
+    LOG_ERROR_F("pattern: No parser found for file (load)%s.", file);
+    return -1;
+}
+
+/**
+ * Save pattern to file
+ * @param file file to load
+ * @param pattern allocated Pattern to load into
+ * @return -1 on error, else length of merged pattern data
+ */
+int pattern_save_file(char *file, Pattern *pattern) {
+    // todo path_build?
+    char *ext = str_getfileext(file);
+
+    Path path;
+    path_build(file, path);
+
+    if (strcmp(ext, "rle") == 0) {
+        return rle_save_pattern(path, pattern);
+    }
+
+    LOG_ERROR_F("pattern: No parser found for file (save)%s", file);
     return -1;
 }

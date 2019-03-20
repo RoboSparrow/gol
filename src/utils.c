@@ -83,7 +83,7 @@ int path_build(char *segment, Path path) {
 
     int clen = strlen(FS_ROOT_DIR) + strlen(segment);
     if (clen > PATH_MAX) {
-        fprintf(stderr, "path_resolve: combined len %d is lager than MAX_PATH (%d) \n", clen, PATH_MAX);
+        LOG_ERROR_F("Combined len %d is lager than MAX_PATH (%d)", clen, PATH_MAX);
         return 0;
     }
 

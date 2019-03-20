@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define LOG_ERROR(format) do { fprintf(stderr, "[error](%s:%d) " format "\n", __FILE__, __LINE__); } while(0)
+#define LOG_ERROR_F(format, ...) do { fprintf(stderr, "[error](%s:%d) " format "\n", __FILE__, __LINE__, __VA_ARGS__); } while(0)
+
 #define EXIT_NULL(val, message) if (val == NULL) { fprintf(stderr, "fatal error: %s", message); exit(EXIT_FAILURE); }
 #define EXIT_MINUS(val, message) if (val < 0) { fprintf(stderr, "fatal error: %s", message); exit(EXIT_FAILURE); }
 

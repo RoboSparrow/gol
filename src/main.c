@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     // init world data
     world->data = gol_allocate_data(world->cols, world->rows);
     EXIT_NULL(world->data, "could not allocate memory(2) for world pattern");
-
+printf("==> %s\n", patternfile);
     // populate world
     if(patternfile[0] == '\0') {
         // random world
@@ -43,13 +43,19 @@ int main(int argc, char* argv[]) {
     } else {
         Pattern *pattern = pattern_allocate_pattern();
         EXIT_NULL(world, "main: could not allocate memory for pattern file\n");
-
         int loaded = pattern_load_file(patternfile, pattern, PATTERN_FULL);
+
         EXIT_MINUS(loaded, "main: could not load pattern file\n");
         gol_merge_data(pattern, world, (world->cols - pattern->cols) / 2, (world->rows - pattern->rows) / 2);
+
         gol_free_data(pattern->data);
         pattern_free_pattern(pattern);
     }
+
+    // autosave world
+
+    int saved = pattern_save_file("save/autosave.rle", world);
+    EXIT_MINUS(saved, "main: could not save pattern file (autosave)\n");
 
     paint_init(world->cols, world->rows);
 

@@ -51,13 +51,13 @@ void font_init() {
     path_build("hellovetica.ttf", path);
 
     if(TTF_Init( )== -1) {
-        fprintf(stderr, "TTF_Init error: %s\n", TTF_GetError());
+        LOG_ERROR_F("TTF_Init error: %s.", TTF_GetError());
         exit(EXIT_FAILURE);
     }
 
     font = TTF_OpenFont(path, font_size);
     if (font == NULL) {
-         fprintf(stderr, "unable to locate font in ./, trying ./bin\n");
+         LOG_ERROR_F("unable to locate font in %s.", path);
          exit(EXIT_FAILURE);
     }
 }
@@ -79,7 +79,7 @@ SDL_Rect render_text(char text[]) {
     SDL_Surface *text_surface;
 
     if (!(text_surface = TTF_RenderUTF8_Solid(font, text, text_color))) {
-        fprintf(stderr, "Failed to render text: %p\n", TTF_GetError());
+        LOG_ERROR_F("Failed to render text: %p.", TTF_GetError());
         return text_rect;
     } else {
         text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
@@ -100,21 +100,21 @@ void paint_init(int cols, int rows) {
     int sizeY = UNIT_SIZE * rows;
 
     if (SDL_Init(SDL_INIT_EVERYTHING) == -1) {
-        fprintf(stderr, " Failed to initialize SDL : %p\n", SDL_GetError());
+        LOG_ERROR_F("Failed to initialize SDL : %p.", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
     // @see https://wiki.libsdl.org/SDL_WindowFlags
     window = SDL_CreateWindow( "RoboSparrow's game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
     if (window == NULL) {
-        fprintf(stderr, "Failed to create window : %p\n", SDL_GetError());
+        LOG_ERROR_F("Failed to create window : %p.", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
     // @see https://wiki.libsdl.org/SDL_RendererFlags
     renderer = SDL_CreateRenderer(window, -1, 0);
     if(renderer == NULL){
-        fprintf(stderr, "Failed to create renderer : %p\n", SDL_GetError());
+        LOG_ERROR_F("Failed to create renderer : %p.", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
