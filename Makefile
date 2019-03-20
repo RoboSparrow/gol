@@ -42,11 +42,13 @@ obj/%.o: src/%.c
 assets:
 	cp -f assets/fonts/hellovetica.ttf bin/hellovetica.ttf
 	mkdir -p bin/patterns && cp -a -f assets/patterns/. bin/patterns/
+	mkdir -p bin/save
 
 # maintenance
 
 clean:
 	$(RM) $(OBJ)
 	$(RM) bin/patterns/*
+	$(RM) bin/save/*
 
 # Based on the excellent walkthroughs by [Chnossos](https://stackoverflow.com/a/30602701) and [John Tsiombikas](http://nuclear.mutantstargoat.com/articles/make)
