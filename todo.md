@@ -1,14 +1,13 @@
 - main root dir:
     - system agnostic way to find dir
     - protect root dir var
-- rle-parser: better identification of comment lines (snprintf)
-- rle_load_meta & rle_load_data, option for using same filepointer
+x ~~rle-parser: better identification of comment lines (snprintf)~~
+x rle_load_meta & rle_load_data, option for using same filepointer
 x pattern, meta alloc: check null
-- pattern offset center option
-- pattern struct: add offsets, data, type props
-- rle-parser: save as rle
+x pattern offset center option
+x pattern struct: ~~add offsets~~, data, ~~type props~~
+x rle-parser: save as rle
 - cell-parser: http://conwaylife.com/wiki/Plaintext
- - complete rle parser: reverse- save game as rle
 
 sdl:
 - view pattern static (for preview and future editor)
