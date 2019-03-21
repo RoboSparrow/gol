@@ -12,7 +12,7 @@
  */
 void cli_print_patternlist(PatternList *list) {
     for(int i = 0; i < list->len; i++) {
-        printf("%d) %s (%dx%d)\n", i, list->patterns[i]->title, list->patterns[i]->cols, list->patterns[i]->rows);
+        printf("%d) %s (%dx%d)\n", i + 1, list->patterns[i]->title, list->patterns[i]->cols, list->patterns[i]->rows);
         printf("    * %s\n", list->patterns[i]->description);
     }
 }
@@ -77,8 +77,8 @@ void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
 
                 int selected = select_pattern(list->len);
 
-                printf("=> %s\n", list->patterns[selected]->file);
-                strcpy(patternfile, list->patterns[selected]->file);
+                printf("=> %s\n", list->patterns[selected - 1]->file);
+                strcpy(patternfile, list->patterns[selected - 1]->file);
 
                 pattern_free_patternlist(list);
                 // exit(EXIT_SUCCESS);
