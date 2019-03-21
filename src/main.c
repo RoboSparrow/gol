@@ -1,3 +1,4 @@
+#ifndef __DOING_TESTS__
 // adapted to c: http://headerphile.com/sdl2/sdl2-part-4-making-things-happen/
 #include <stdio.h>
 #include <unistd.h>
@@ -9,7 +10,6 @@
 #include "state.h"
 #include "rle-parser.h"
 #include "pattern.h"
-
 #include "init.h"
 
 Path FS_ROOT_DIR;
@@ -48,7 +48,6 @@ int main(int argc, char* argv[]) {
         EXIT_MINUS(loaded, "main: could not load pattern file\n");
         gol_merge_data(pattern, world, (world->cols - pattern->cols) / 2, (world->rows - pattern->rows) / 2);
 
-        gol_free_data(pattern->data);
         pattern_free_pattern(pattern);
     }
 
@@ -95,7 +94,6 @@ int main(int argc, char* argv[]) {
                                 EXIT_MINUS(loaded, "main: could not load pattern file\n");
 
                                 gol_merge_data(pattern, world, (world->cols - pattern->cols) / 2, (world->rows - pattern->rows) / 2);
-                                gol_free_data(pattern->data);
                                 pattern_free_pattern(pattern);
                             }
                     break;
@@ -115,9 +113,8 @@ int main(int argc, char* argv[]) {
 
     running = 0;
     paint_exit(world->cols, world->rows);
-
-    gol_free_data(world->data);
     pattern_free_pattern(world);
 
     return 0;
 }
+#endif

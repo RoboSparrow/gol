@@ -16,6 +16,7 @@ Pattern *pattern_allocate_pattern() {
         LOG_ERROR("Could not allocate enough memory for pattern.");
         return pattern;
     }
+    pattern->data = NULL;
     return pattern;
 }
 
@@ -26,6 +27,7 @@ void pattern_free_pattern(Pattern *pattern) {
     if (pattern == NULL) {
         return;
     }
+    gol_free_data(pattern->data);
     free(pattern);
 }
 
