@@ -13,6 +13,13 @@ obj/*
 # executables
 bin/*
 !bin/.gitkeep
+
+# tests
+test/out/*
+test/out.*
+test/*.log
+!test/out/.gitkeep
+# test binaries
 test/run*
 
 #logs
