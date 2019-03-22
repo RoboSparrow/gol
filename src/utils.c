@@ -26,22 +26,22 @@ void str_nospaces(char* source) {
 }
 
 /**
- * trims a stringleft and right, removes line breaks
+ * trims a string left and right
  */
-void str_trim(char *str) {
+char *str_trim(char *str) {
+    char *end;
+    // leading
     while (isspace(*str)) {
-        str++;
+        str = str + 1;
     }
-
-    while(*str && *str != '\n' && *str != '\r') {
-        str++;
-    }
-
-    char *end = str + strlen(str) - 1;
+    // trailing
+    end = str + strlen(str) - 1;
     while (end > str && isspace(*end)) {
         end = end - 1;
     }
-    *str = 0;
+
+    *(end + 1) = '\0';
+    return str;
 }
 
 /**
