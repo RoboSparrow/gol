@@ -6,6 +6,7 @@
 #include "pattern.h"
 #include "gol.h"
 #include "rle-parser.h"
+#include "cell-parser.h"
 
 /**
  * creates pattern with zero values
@@ -96,6 +97,10 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
                     loaded = rle_load_pattern(pattern->file, pattern, PATTERN_META);
                 }
 
+                if (strcmp(ext, "cells") == 0) {
+                    loaded = cell_load_pattern(pattern->file, pattern, PATTERN_META);
+                }
+
                 if(loaded != PATTERN_META) {
                     LOG_ERROR_F("error loading pattern file %s", pattern->file);
                 } else {
@@ -156,7 +161,7 @@ void pattern_print_pattern(Pattern *pattern) {
     printf("    |_ rows: %d\n", pattern->rows);
     printf("    |_ state: %s\n", (pattern->state < 3) ? pattern_state_names[pattern->state] : "UNKNOWN");
     if(pattern->data) {
-        printf("    |_ data: ");
+        printf("    |_ data:\n");
         gol_print_data(pattern->data, pattern->cols, pattern->rows);
     }
 }
@@ -184,6 +189,14 @@ int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
         return 0;
     }
 
+    if (strcmp(ext, "cells") == 0) {
+        pattern_state state = cell_load_pattern(file, pattern, targ_state);
+        if(state != targ_state) {
+            return -1;
+        }
+        return 0;
+    }
+
     LOG_ERROR_F("pattern: No parser found for file (load)%s.", file);
     return -1;
 }
@@ -203,6 +216,10 @@ int pattern_save_file(char *file, Pattern *pattern) {
 
     if (strcmp(ext, "rle") == 0) {
         return rle_save_pattern(path, pattern);
+    }
+
+    if (strcmp(ext, "cells") == 0) {
+        return cell_save_pattern(path, pattern);
     }
 
     LOG_ERROR_F("pattern: No parser found for file (save)%s", file);

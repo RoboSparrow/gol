@@ -1,20 +1,6 @@
 /**
  * RLE file parser
  * @see http://www.conwaylife.com/wiki/RLE
- *
- * The first line is a header line, which has the form x = <width>, y = <height>
- * encoded as a sequence of items of the form <run_i><tag>, where <run_i> is the number of occurrences of <tag> and <tag>
- *
- * <run_i> can be omitted if it is equal to 1. The last <run_i><tag> item is followed by a ! character.
- * Dead cells at the end of a pattern line do not need to be encoded, nor does the end of the last line of the pattern.
- * Whitespace is permitted between <run_i><tag> items (and between the last <run_i><tag> item and the following !),
- * but except for carriage returns and line feeds this is not recommended.
- *
- * It is not permitted to place whitespace in the middle of a <run_i><tag> item.
- * Lines in the RLE file must not exceed 70 characters, although it is a good idea for RLE readers to be able to cope with longer lines.
- * DOS, Unix and Mac newline conventions are all acceptable.
- * Anything after the final ! is ignored. It used to be common to put comments here (starting on a new line),
- * but the usual method for adding comments is now by means of #C lines (see below).
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,11 +12,10 @@
 #include "gol.h"
 #include "pattern.h"
 
-#define REL_CELL_DEAD 'b' /** defines value for a dead RLE cell */
-#define REL_CELL_ALIVE 'o' /** defines value for a living RLE cell */
-#define REL_EOROW '$' /** defines value for RLE line break */
-#define REL_EOPATT '!' /** defines value for RLE end of pattern */
-#define REL_COMMENT_FLAG '#' /** defines value for RLE end of pattern */
+#define RLE_CELL_DEAD 'b' /** defines value for a dead RLE cell */
+#define RLE_CELL_ALIVE 'o' /** defines value for a living RLE cell */
+#define RLE_EOROW '$' /** defines value for RLE line break */
+#define RLE_EOPATT '!' /** defines value for RLE end of pattern */
 
 /**
  * parses text data from a comment line into pattern, if certain RLE comment flags are matching pattern properties
@@ -54,18 +39,17 @@ int parse_comment(char *line, Pattern *pattern) {
     }
 
     line += 3;
-    str_trim(line);
 
     switch (flag) {
         case 'N':
-            strcpy(pattern->title, line);
+            strcpy(pattern->title, str_trim(line));
             return 0;
         case 'C':
             // only consider first "c" line
             if (pattern->description[0] != '\0') {
                 return 0;
             }
-            strcpy(pattern->description, line);
+            strcpy(pattern->description, str_trim(line));
             return 0;
     }
 
@@ -81,9 +65,7 @@ int parse_comment(char *line, Pattern *pattern) {
  * @return 0 on success >= 1 if parsing error
  */
 int parse_header(char *line, Pattern *pattern) {
-    str_trim(line);
-
-    str_nospaces(line);
+    str_nospaces(str_trim(line));
 
     // split by comma
     int i = 0;
@@ -120,7 +102,7 @@ int parse_header(char *line, Pattern *pattern) {
  * parses an RLE data row and adds parsed row to data matrix
  * @see http://www.conwaylife.com/wiki/RLE
  *
- * @param row RLE data fragment for a row, already split from data line by REL_EOROW token
+ * @param row RLE data fragment for a row, already split from data line by RLE_EOROW token
  * @param rowOffset row offset in context of data
  * @param pattern Pattern struct
  * @param data data matrix (1D char array)
@@ -143,7 +125,7 @@ int parse_data_row(char *row, int rowOffset, Pattern *pattern) {
             digitIndex++;
         }
 
-        if(row[i] == REL_CELL_DEAD || row[i] == REL_CELL_ALIVE) {
+        if(row[i] == RLE_CELL_DEAD || row[i] == RLE_CELL_ALIVE) {
             //parse previously allocated digits
             int amount = 1;
             if(digitIndex > 0) {
@@ -157,7 +139,7 @@ int parse_data_row(char *row, int rowOffset, Pattern *pattern) {
             }
 
             // write group
-            char cell = (row[i] == REL_CELL_DEAD) ? GOL_DEAD : GOL_ALIVE;
+            char cell = (row[i] == RLE_CELL_DEAD) ? GOL_DEAD : GOL_ALIVE;
             // printf("---> %d -, amount %d: cell %d \n", index, amount, cell);
             for(int k = 0; k < amount; k++) {
                 pattern->data[index] = cell;
@@ -196,14 +178,14 @@ int parse_data(FILE *fp, Pattern *pattern) {
             break ;
         }
 
-        if(ch == REL_EOROW || ch == REL_EOPATT) {
+        if(ch == RLE_EOROW || ch == RLE_EOPATT) {
             row[i] = '\0';
             parse_data_row(row, rowIndex, pattern);
             row[0] = '\0'; // clear
             i = 0;
             rowIndex++;
             // end of data
-            if(ch == REL_EOPATT) {
+            if(ch == RLE_EOPATT) {
                 break;
             }
             continue;
@@ -234,20 +216,17 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
     // make sure we are on top of file
     rewind(fp);
 
-    // store filepath
-
     char identifier;
     for (int i = 0; 1; i++) {
-        // EOF
         char line[LINE_BOUNDS];
 
+        // EOF
         if (fgets(line, LINE_BOUNDS, fp) == NULL) {
             break;
         }
 
         identifier = tolower(line[0]);
-
-        if (identifier == REL_COMMENT_FLAG) {
+        if (identifier == '#') {
             if (parse_comment(line, pattern)) {
                 LOG_ERROR_F("rle-parser: Unable able to parse comment line (%d).", i);
             }
@@ -265,7 +244,7 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
     }
 
     // entering data section
-    if (isdigit(identifier) || identifier == REL_CELL_ALIVE || identifier == REL_CELL_DEAD) {
+    if (isdigit(identifier) || identifier == RLE_CELL_ALIVE || identifier == RLE_CELL_DEAD) {
         fclose(fp);
         return 0;
     }
@@ -301,7 +280,7 @@ int rle_load_data(FILE *fp, Pattern *pattern) {
         }
 
         identifier = tolower(line[0]);
-        if (identifier == REL_COMMENT_FLAG) {
+        if (identifier == '#') {
             continue;
         }
 
@@ -326,9 +305,8 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
     strcpy(pattern->file, file);
 
     FILE *fp = fopen(file, "r");
-
     if (fp == NULL) {
-        LOG_ERROR_F("Error while opening the file fir %s.", file);
+        LOG_ERROR_F("Error while opening the file %s.", file);
         return PATTERN_NONE;
     }
 
@@ -375,35 +353,42 @@ int rle_save_pattern(Path file, Pattern *pattern) {
     }
 
     int cols  = pattern->cols;
-    int rows  = pattern->rows;
     char *data  = pattern->data;
 
     fprintf(fp, "#N %s\n", pattern->title);
     fprintf(fp, "#C %s\n", pattern->description);
     fprintf(fp, "x = %d, y = %d\n", pattern->cols, pattern->rows);
 
-    char last = REL_CELL_DEAD;
-    char count = 0;
-    char cell;
-    for (int r = 0; r < rows; r++) {
-        count = 0;
-        for (int c = 0; c < cols; c++) {
-            int offset = (r * cols) + c;
+    int i = 1;
+    int size = pattern->cols * pattern->rows;
+    char last = data[0];
+    int count = 1;
+
+    while (i < size) {
+        if (data[i] != last) {
+            char cell = (last == GOL_DEAD) ? RLE_CELL_DEAD : RLE_CELL_ALIVE;
+            fprintf(fp, "%d%c", count, cell);
+
+            last = data[i];
+            count = 1;
+        } else {
             count++;
-            cell = (data[offset] == GOL_ALIVE) ? REL_CELL_ALIVE : REL_CELL_DEAD;
-            if (cell != last) {
-                fprintf(fp, "%d%c", count, last);
-                count = 0;
-                last = cell;
+        }
+        // line end
+        if(i % cols == 0) {
+            if(data[i] == last) {
+                char cell = (last == GOL_DEAD) ? RLE_CELL_DEAD : RLE_CELL_ALIVE;
+                fprintf(fp, "%d%c", count, cell);
+            }
+            if(i < size - 1) {
+                last = data[i + 1];
+                count = 1;
+                fprintf(fp, "%c", RLE_EOROW);
             }
         }
-        // line was filled with same cells
-        if (count == cols) {
-            fprintf(fp, "%d%c", count, last);
-        }
-        fprintf(fp, (r < rows -1) ? "$" : "!");
+        i++;
     }
-
+    fprintf(fp, "%c", RLE_EOPATT);
     fclose(fp);
 
     return 0;
