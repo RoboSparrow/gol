@@ -8,9 +8,11 @@ x pattern offset center option
 x pattern struct: ~~add offsets~~, data, ~~type props~~
 x rle-parser: save as rle
 - cell-parser: http://conwaylife.com/wiki/Plaintext
+- terminate char * data with nul so we can safely use string.h
 
 sdl:
 - view pattern static (for preview and future editor)
+- calculate screen dims and set dynamic size
 - zoom (center world on start)
 
 milestones
