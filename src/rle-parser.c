@@ -25,7 +25,7 @@
  * @param pattern Pattern struct
  * @return 0 on success >= 1 if parsing error
  */
-int parse_comment(char *line, Pattern *pattern) {
+int rle_parse_comment(char *line, Pattern *pattern) {
 
     char flag = toupper(line[1]);
 
@@ -64,7 +64,7 @@ int parse_comment(char *line, Pattern *pattern) {
  * @param pattern Pattern struct
  * @return 0 on success >= 1 if parsing error
  */
-int parse_header(char *line, Pattern *pattern) {
+int rle_parse_header(char *line, Pattern *pattern) {
     str_nospaces(str_trim(line));
 
     // split by comma
@@ -105,10 +105,8 @@ int parse_header(char *line, Pattern *pattern) {
  * @param row RLE data fragment for a row, already split from data line by RLE_EOROW token
  * @param rowOffset row offset in context of data
  * @param pattern Pattern struct
- * @param data data matrix (1D char array)
- * @return 0 on success >= 1 if parsing error
  */
-int parse_data_row(char *row, int rowOffset, Pattern *pattern) {
+void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
 
     int index = rowOffset * pattern->cols;
     int len = strlen(row);
@@ -151,19 +149,17 @@ int parse_data_row(char *row, int rowOffset, Pattern *pattern) {
 
         i++;
     }
-
-    return 0;
 }
 
 /**
  * parses RLE datastring into a prepared data matrix
  * @see http://www.conwaylife.com/wiki/RLE
  *
- * @param fp FILE pointer
+ * @param fp FILE pointer , aleady set to start of data section!
  * @param pattern Pattern struct with alredy ready allocated data matrix filled with GOL_CELL_DEAD values (1D char array)
  * @return 0 on success >= 1 if parsing error
  */
-int parse_data(FILE *fp, Pattern *pattern) {
+int rle_parse_data(FILE *fp, Pattern *pattern) {
     //int len = pattern->rows * pattern->cols;
     int i = 0;
     int rowIndex = 0;
@@ -180,7 +176,7 @@ int parse_data(FILE *fp, Pattern *pattern) {
 
         if(ch == RLE_EOROW || ch == RLE_EOPATT) {
             row[i] = '\0';
-            parse_data_row(row, rowIndex, pattern);
+            rle_parse_data_row(row, rowIndex, pattern);
             row[0] = '\0'; // clear
             i = 0;
             rowIndex++;
@@ -193,7 +189,6 @@ int parse_data(FILE *fp, Pattern *pattern) {
 
         row[i] = ch;
         i++;
-
     }
 
     return 0;
@@ -227,7 +222,7 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
 
         identifier = tolower(line[0]);
         if (identifier == '#') {
-            if (parse_comment(line, pattern)) {
+            if (rle_parse_comment(line, pattern)) {
                 LOG_ERROR_F("rle-parser: Unable able to parse comment line (%d).", i);
             }
             continue;
@@ -236,7 +231,7 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
         // header line: there is eact 1 header line foolwed by data lines.
         // stop line reading and continue read data char-by-char
         if (identifier == 'x' || identifier == 'y') {
-            if (parse_header(line, pattern)) {
+            if (rle_parse_header(line, pattern)) {
                 LOG_ERROR_F("rle-parser: Unable able to parse header line (%d).", i);
             }
             break;
@@ -265,16 +260,22 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
  * @return 0 on success >= 1 if parsing error
  */
 int rle_load_data(FILE *fp, Pattern *pattern) {
-    rewind (fp);// TODO this should not be neccessary
+    rewind (fp); // TODO use fseek, this should not be neccessary
 
     int i = 0;
     char identifier;
 
+    // guard
+    if (pattern->state < PATTERN_META) {
+         LOG_ERROR("error loading pattern data before loading meta meta.");
+         fclose(fp);
+         return -1;
+    }
+
     // scan through non-data lines
     for (i = 0; 1; i++) {
-        // EOF
         char line[LINE_BOUNDS];
-
+        //EOF
         if (fgets(line, LINE_BOUNDS, fp) == NULL) {
             break;
         }
@@ -291,7 +292,7 @@ int rle_load_data(FILE *fp, Pattern *pattern) {
         }
     }
 
-    if (parse_data(fp, pattern)) {
+    if (rle_parse_data(fp, pattern)) {
         LOG_ERROR("rle-parser: Unable able to parse data.");
         // exit(EXIT_FAILURE);
     }
