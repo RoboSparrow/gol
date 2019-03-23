@@ -132,16 +132,16 @@ void gol_random(Pattern *world) {
  */
 char *gol_allocate_data(int cols, int rows) {
     // prepare data
-    size_t size = rows * cols * sizeof(char);
-
-    char *data = malloc(size);
+    size_t size = (rows * cols) + 1;
+    char *data = malloc(size * sizeof(char));
 
     if (data == NULL) {
         perror("Could not allocate enough memory for data.\n");
         return data;
     }
     // fill data with default cell value (dead)
-    memset(data, GOL_DEAD, size);
+    memset(data, GOL_DEAD, size - 1);
+    data[size] = '\0';
     return data;
 }
 
