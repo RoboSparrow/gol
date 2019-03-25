@@ -31,7 +31,7 @@ typedef struct patternList {
     Pattern **patterns;
 } PatternList;
 
-PatternList *pattern_load_patternlist(char *dirname, char *ext);
+PatternList *pattern_load_patternlist(char *dirname);
 void pattern_free_patternlist(PatternList *list);
 
 Pattern *pattern_allocate_pattern();

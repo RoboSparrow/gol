@@ -37,7 +37,7 @@ void pattern_free_pattern(Pattern *pattern) {
  * @param dirname  name of tartget dir within the directory of the executable
  * @param ext file extension to filter directory for
  */
-PatternList *pattern_load_patternlist(char *dirname, char *ext) {
+PatternList *pattern_load_patternlist(char *dirname) {
 
     PatternList li = {
         .len = 0,
@@ -63,7 +63,7 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
     e = readdir(dir);
     while(NULL != e){
         char *fext = str_getfileext(e->d_name);
-        if(strcmp(fext, ext) == 0) {
+        if(strcmp(fext, "rle") == 0 || strcmp(fext, "cells") == 0) {
             // printf("%s\n", e->d_name);
             len++;
         }
@@ -84,7 +84,7 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
     e = readdir(dir);
     while(NULL != e){
         char *fext = str_getfileext(e->d_name);
-        if(strcmp(fext, ext) == 0) {
+        if(strcmp(fext, "rle") == 0 || strcmp(fext, "cells") == 0) {
                 Pattern *pattern = pattern_allocate_pattern();
 
                 strcpy(pattern->file, path);
@@ -93,11 +93,11 @@ PatternList *pattern_load_patternlist(char *dirname, char *ext) {
 
                 pattern_state loaded;
                 // insert parser of choice here
-                if (strcmp(ext, "rle") == 0) {
+                if (strcmp(fext, "rle") == 0) {
                     loaded = rle_load_pattern(pattern->file, pattern, PATTERN_META);
                 }
 
-                if (strcmp(ext, "cells") == 0) {
+                if (strcmp(fext, "cells") == 0) {
                     loaded = cell_load_pattern(pattern->file, pattern, PATTERN_META);
                 }
 

@@ -68,7 +68,7 @@ void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
                 rows = atoi(optarg);
             break;
             case 'l': {
-                PatternList *list = pattern_load_patternlist("patterns", "rle");
+                PatternList *list = pattern_load_patternlist("patterns");
                 if(list == NULL) {
                     LOG_ERROR("init: Unable to load pattern list.");
                     exit(EXIT_FAILURE);
