@@ -7,8 +7,10 @@ x pattern, meta alloc: check null
 x pattern offset center option
 x pattern struct: ~~add offsets~~, data, ~~type props~~
 x rle-parser: save as rle
-- cell-parser: http://conwaylife.com/wiki/Plaintext
-- terminate char * data with nul so we can safely use string.h
+x cell-parser: http://conwaylife.com/wiki/Plaintext
+x terminate char * data with nul so we can safely use string.h
+- cell parser, save pattern: add compress (trailing dead cells)
+- improve utils functons, add tests
 
 sdl:
 - view pattern static (for preview and future editor)
@@ -16,7 +18,7 @@ sdl:
 - zoom (center world on start)
 
 milestones
- - rle/cell parser
+ x rle/cell parser
  - load/save screen
  - editor screen
  - win32 support (fs)
