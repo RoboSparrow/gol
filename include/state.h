@@ -7,4 +7,9 @@
 
 #define UNIT_SIZE 10
 
+typedef enum {
+    SDL_SCREEN_START,
+    SDL_SCREEN_WORLD
+} SdlScreen;
+
 #endif
