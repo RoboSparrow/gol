@@ -18,7 +18,7 @@ void sdl_init(Pattern *world) {
     int init = SDL_Init(SDL_INIT_EVERYTHING);
     EXIT_MINUS_F(init, "Failed to initialize SDL: %s.", SDL_GetError());
 
-    window = SDL_CreateWindow( "RoboSparrow's game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
+    window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
     EXIT_NULL_F(window, "Failed to create SDL window: %s.", SDL_GetError());
 
     renderer = SDL_CreateRenderer(window, -1, 0);
@@ -27,7 +27,7 @@ void sdl_init(Pattern *world) {
     // SDL ttf
 
     Path path;
-    path_build("hellovetica.ttf", path);
+    path_build(FONT, path);
     int font_size = 10;
 
     int tinit = TTF_Init();

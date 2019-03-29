@@ -40,7 +40,7 @@ obj/%.o: src/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 assets:
-	cp -f assets/fonts/hellovetica.ttf bin/hellovetica.ttf
+	cp -a -f assets/fonts/. bin/assets/
 	mkdir -p bin/patterns && cp -a -f assets/patterns/. bin/patterns/
 	mkdir -p bin/save
 
@@ -50,5 +50,6 @@ clean:
 	$(RM) $(OBJ)
 	$(RM) bin/patterns/*
 	$(RM) bin/save/*
+	$(RM) bin/assets/*
 
 # Based on the excellent walkthroughs by [Chnossos](https://stackoverflow.com/a/30602701) and [John Tsiombikas](http://nuclear.mutantstargoat.com/articles/make)
