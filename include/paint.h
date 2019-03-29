@@ -6,11 +6,6 @@
 #define __PAINT_H__
 
 /**
- * initialize renderer
- */
-void paint_init(int cols, int rows);
-
-/**
  * clear renderer
  */
 void paint_clear();
@@ -34,10 +29,5 @@ void paint_loop_row_end();
  * render end within an update loop
  */
 void paint_loop_end(int cols, int rows);
-
-/**
- * exit renderer
- */
-void paint_exit(int cols, int rows);
 
 #endif
