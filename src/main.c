@@ -11,6 +11,8 @@
 #include "rle-parser.h"
 #include "pattern.h"
 #include "init.h"
+#include "state.h"
+#include "sdl.h"
 
 Path FS_ROOT_DIR;
 
@@ -18,6 +20,7 @@ int main(int argc, char* argv[]) {
 
     int running = 1;
     int paused = 0;
+    SdlScreen screen = SDL_SCREEN_WORLD;
 
     Path patternfile = "";
     SDL_Event e;
@@ -56,7 +59,7 @@ int main(int argc, char* argv[]) {
     int saved = pattern_save_file("save/autosave.rle", world);
     EXIT_MINUS(saved, "main: could not save pattern file (autosave)\n");
 
-    paint_init(world->cols, world->rows);
+    sdl_init(world);
 
     // add a small delay so that return key event from cli is not captured
     // TODO use var
@@ -101,18 +104,25 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        if (!paused) {
-            paint_loop_start(world->cols, world->rows);
-            gol_update(world);
-            paint_loop_end(world->cols, world->rows);
+
+        switch (screen) {
+            case SDL_SCREEN_START:
+            case SDL_SCREEN_WORLD:
+                if (!paused) {
+                    paint_loop_start(world->cols, world->rows);
+                    gol_update(world);
+                    paint_loop_end(world->cols, world->rows);
+                }
+            break;
             // exit(0); // DEV valgrind with SDL
+
         }
 
         SDL_Delay(50); // 15 fps
     }
 
     running = 0;
-    paint_exit(world->cols, world->rows);
+    sdl_exit();
     pattern_free_pattern(world);
 
     return 0;
