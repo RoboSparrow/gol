@@ -59,7 +59,10 @@ int main(int argc, char* argv[]) {
     int saved = pattern_save_file("save/autosave.rle", world);
     EXIT_MINUS(saved, "main: could not save pattern file (autosave)\n");
 
+    // init sdl
     renderer_init(world);
+    // init screens
+    screen_world_init();
 
     // add a small delay so that return key event from cli is not captured
     // TODO use var
@@ -80,7 +83,7 @@ int main(int argc, char* argv[]) {
                         paused = !paused;
                     break;
                     case SDLK_RETURN:
-                        render_clear_world();
+                        screen_world_clear();
                         paused = 0;
                         SDL_Delay(200);
                             if(strlen(patternfile) == 0) {
@@ -110,7 +113,7 @@ int main(int argc, char* argv[]) {
             break;
             case SDL_SCREEN_WORLD:
                 if (!paused) {
-                    render_world(world);
+                    screen_world_render(world);
                 }
             break;
             // exit(0); // DEV valgrind with SDL
@@ -121,7 +124,9 @@ int main(int argc, char* argv[]) {
     }
 
     running = 0;
-    renderer_exit();
+    // exit screens an renderer
+    screen_world_destroy();
+    renderer_destroy();
     pattern_free_pattern(world);
 
     return 0;

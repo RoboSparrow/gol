@@ -20,6 +20,8 @@ SDL_Rect rect = {
     .h = UNIT_SIZE
 };
 
+SDL_Texture *hints = NULL;
+
 // renderer logical output size
 // todo to sdl.h SDL_RenderGetLogicalSize
 int rw = 0;
@@ -51,29 +53,36 @@ void render_world_background(int cols, int rows) {
 /**
  * render text hints
  */
-void render_world_hints(char text[]) {
-    int w = 0;
-    int h = 0;
-    SDL_Rect text_rect = { 0, 0, rw, rh };
+void init_world_hints(char text[]) {
     SDL_Surface *surface;
-    SDL_Texture *texture;
 
     if (!(surface = TTF_RenderUTF8_Solid(font, text, Colors.text))) {
         LOG_ERROR_F("Failed to render text: %p.", TTF_GetError());
         return;
     }
 
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_QueryTexture(texture, NULL, NULL, &w, &h);
-    text_rect.w = w;
-    text_rect.h = h;
-    text_rect.x = (rw - text_rect.w) / 2;
-    text_rect.y = rh - text_rect.h - 10;
-
-    SDL_RenderCopy(renderer, texture, NULL, &text_rect);
-
+    hints = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
+}
+
+/**
+ * render text hints
+ */
+void render_world_hints() {
+    if (hints == NULL) {
+        return;
+    }
+
+    int w = 0;
+    int h = 0;
+    SDL_Rect r = { 0, 0, rw, rh };
+
+    SDL_QueryTexture(hints, NULL, NULL, &w, &h);
+    r.w = w;
+    r.h = h;
+    r.x = (rw - r.w) / 2;
+    r.y = rh - r.h - 10;
+    SDL_RenderCopy(renderer, hints, NULL, &r);
 }
 
 ////
@@ -104,8 +113,14 @@ void render_world_loop_cell(char cell, int index, int cols, int rows) {
 /**
  * render world screen
  */
-void render_world(Pattern *world) {
+void screen_world_init(Pattern *world) {
+    init_world_hints("press enter for restart, space for pause");
+}
 
+/**
+ * render world screen
+ */
+void screen_world_render(Pattern *world) {
     SDL_RenderGetLogicalSize(renderer, &rw, &rh);
 
     renderer_set_color(Colors.bg);
@@ -118,18 +133,24 @@ void render_world(Pattern *world) {
     gol_update(world, &render_world_loop_cell);
 
     renderer_set_color(Colors.text);
-    render_world_hints("press enter for restart, space for pause");//TODO daw only once and cache
+    render_world_hints();
 
     SDL_RenderPresent(renderer);
-    //render_world_loop_end(world->cols, world->rows);
 }
 
 /**
  * clear world screen
  */
-void render_clear_world() {
+void screen_world_clear() {
     renderer_set_color(Colors.bg);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
+}
+
+/**
+ * clear world screen
+ */
+void screen_world_destroy() {
+      SDL_DestroyTexture(hints);
 }
 

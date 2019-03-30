@@ -19,7 +19,7 @@ extern TTF_Font *font;
 ////
 
 void renderer_init(Pattern *world);
-void renderer_exit();
+void renderer_destroy();
 
 ////
 // start screen
@@ -31,8 +31,10 @@ void render_start(Pattern *world);
 // world screen
 ////
 
-void render_world(Pattern *world);
-void render_clear_world();
+void screen_world_init();
+void screen_world_render(Pattern *world);
+void screen_world_clear();
+void screen_world_destroy();
 
 ////
 // utility functions

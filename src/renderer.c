@@ -49,7 +49,7 @@ void renderer_init(Pattern *world) {
 /**
  * exits Sdl and Sdl modules
  */
-void renderer_exit() {
+void renderer_destroy() {
     if(font) {
         TTF_CloseFont(font);
         font = NULL;
