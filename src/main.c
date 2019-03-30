@@ -6,13 +6,13 @@
 
 #include "utils.h"
 #include "gol.h"
-#include "paint.h"
+#include "renderer.h"
 #include "state.h"
 #include "rle-parser.h"
 #include "pattern.h"
 #include "init.h"
 #include "state.h"
-#include "sdl.h"
+#include "renderer.h"
 
 Path FS_ROOT_DIR;
 
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     int saved = pattern_save_file("save/autosave.rle", world);
     EXIT_MINUS(saved, "main: could not save pattern file (autosave)\n");
 
-    sdl_init(world);
+    renderer_init(world);
 
     // add a small delay so that return key event from cli is not captured
     // TODO use var
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
                         paused = !paused;
                     break;
                     case SDLK_RETURN:
-                        paint_clear();
+                        render_clear_world();
                         paused = 0;
                         SDL_Delay(200);
                             if(strlen(patternfile) == 0) {
@@ -104,14 +104,13 @@ int main(int argc, char* argv[]) {
             }
         }
 
-
         switch (screen) {
             case SDL_SCREEN_START:
+                // render_start(world);
+            break;
             case SDL_SCREEN_WORLD:
                 if (!paused) {
-                    paint_loop_start(world->cols, world->rows);
-                    gol_update(world);
-                    paint_loop_end(world->cols, world->rows);
+                    render_world(world);
                 }
             break;
             // exit(0); // DEV valgrind with SDL
@@ -122,7 +121,7 @@ int main(int argc, char* argv[]) {
     }
 
     running = 0;
-    sdl_exit();
+    renderer_exit();
     pattern_free_pattern(world);
 
     return 0;
