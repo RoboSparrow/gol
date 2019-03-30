@@ -92,7 +92,7 @@ int gol_update_cell(char *data, int index, int cols, int rows) {
 /**
  *  A day in world history. Updates world data matrix according to gol rules.
  */
-void gol_update(Pattern *world) {
+void gol_update(Pattern *world, void (*render_cell)(int cell, int index, int cols, int rows)) {
     int cols = world->cols;
     int rows = world->rows;
     char *data = world->data;
@@ -103,12 +103,14 @@ void gol_update(Pattern *world) {
         // update
         int cell = gol_update_cell(data, i, cols, rows);
         // render
-        paint_loop_cell(cell, i, cols, rows);
+        render_cell(cell, i, cols, rows);
         // cache
         out[i] = cell;
+        /*
         if((i + 1) % cols == 0) {
-            paint_loop_row_end();
+            // end of row
         }
+        */
     }
     memcpy(data, out, strlen(data));
 }

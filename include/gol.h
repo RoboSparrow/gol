@@ -23,7 +23,11 @@ void gol_merge_data(Pattern *src, Pattern *targ, int offset_cols, int offset_row
 #define GOL_CLUSTER_SIZE 9 /** defines size of neighbor cluster array (8) of a cell, including that cell */
 
 void gol_random(Pattern *world);
-void gol_update(Pattern *world);
+
+void gol_update(
+    Pattern *world,
+    void (*render_cell)(int cell, int index, int cols, int rows)
+);
 
 int gol_col(int index, int row, int cols);
 int gol_row(int index, int cols);
