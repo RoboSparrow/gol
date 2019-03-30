@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "gol.h"
-#include "paint.h"
 #include "pattern.h"
 
 int gol_row(int index, int cols) {

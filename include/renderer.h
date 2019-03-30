@@ -14,12 +14,29 @@ extern SDL_Window* window;
 extern SDL_Renderer* renderer;
 extern TTF_Font *font;
 
+////
 //global
+////
 
 void renderer_init(Pattern *world);
 void renderer_exit();
 
+////
+// start screen
+////
+
+void render_start(Pattern *world);
+
+////
+// world screen
+////
+
+void render_world(Pattern *world);
+void render_clear_world();
+
+////
 // utility functions
+////
 
 void renderer_set_color(SDL_Color color);
 
