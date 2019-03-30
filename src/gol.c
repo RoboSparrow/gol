@@ -91,7 +91,7 @@ int gol_update_cell(char *data, int index, int cols, int rows) {
 /**
  *  A day in world history. Updates world data matrix according to gol rules.
  */
-void gol_update(Pattern *world, void (*render_cell)(int cell, int index, int cols, int rows)) {
+void gol_update(Pattern *world, void (*render_cell)(char cell, int index, int cols, int rows)) {
     int cols = world->cols;
     int rows = world->rows;
     char *data = world->data;

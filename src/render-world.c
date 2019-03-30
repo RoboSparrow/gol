@@ -83,7 +83,7 @@ void render_world_hints(char text[]) {
 /**
  * callback for rendering a single cell within an update loop
  */
-void render_world_loop_cell(int cell, int index, int cols, int rows) {
+void render_world_loop_cell(char cell, int index, int cols, int rows) {
     // SDL_Log("cell index %d, status %d", index, cell);
     if (cell == GOL_ALIVE) {
 

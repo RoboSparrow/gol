@@ -26,7 +26,7 @@ void gol_random(Pattern *world);
 
 void gol_update(
     Pattern *world,
-    void (*render_cell)(int cell, int index, int cols, int rows)
+    void (*render_cell)(char cell, int index, int cols, int rows)
 );
 
 int gol_col(int index, int row, int cols);
