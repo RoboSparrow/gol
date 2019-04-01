@@ -4,10 +4,12 @@
 #include "state.h"
 #include "pattern.h"
 #include "utils.h"
+#include "renderer.h"
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 TTF_Font *font = NULL;
+RendererInfo rendererInfo = { 0, 0 };
 
 ////
 // global functions
@@ -44,6 +46,15 @@ void renderer_init(Pattern *world) {
     EXIT_NULL_F(font, "Failed to load SDL_TTF font: %s.", TTF_GetError());
 
     SDL_RenderSetLogicalSize(renderer, sizeX, sizeY);
+}
+
+/**
+ * updates renderer state
+ */
+void renderer_update() {
+    if (renderer != NULL) {
+        SDL_RenderGetLogicalSize(renderer, &rendererInfo.w, &rendererInfo.h);
+    }
 }
 
 /**

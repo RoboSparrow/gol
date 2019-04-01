@@ -7,10 +7,10 @@
 #include "pattern.h"
 #include "renderer.h"
 
-extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 extern TTF_Font *font;
 
+extern RendererInfo rendererInfo;
 extern SdlColors Colors;
 
 SDL_Rect rect = {
@@ -22,28 +22,25 @@ SDL_Rect rect = {
 
 SDL_Texture *hints = NULL;
 
-// renderer logical output size
-// todo to sdl.h SDL_RenderGetLogicalSize
-int rw = 0;
-int rh = 0;
-
 /**
  * render background
+ * @param cols world data matrix width
+ * @param rows world data matrix height
  */
 void render_world_background(int cols, int rows) {
-    int ws = rw / cols;
-    int hs = rh / rows;
+    int ws = rendererInfo.w / cols;
+    int hs = rendererInfo.h / rows;
 
     int i;
     for (i = 0; i < cols; i++) {
-        SDL_RenderDrawLine(renderer, ws * i, 0, ws * i, rh);
+        SDL_RenderDrawLine(renderer, ws * i, 0, ws * i, rendererInfo.h);
     }
-    SDL_RenderDrawLine(renderer, rw, 0, rw, rh);
+    SDL_RenderDrawLine(renderer, rendererInfo.w, 0, rendererInfo.w, rendererInfo.h);
 
     for (i = 0; i < rows; i++) {
-        SDL_RenderDrawLine(renderer, 0, hs * i, rw, hs * i);
+        SDL_RenderDrawLine(renderer, 0, hs * i, rendererInfo.w, hs * i);
     }
-    SDL_RenderDrawLine(renderer, 0, rh, rw, rh);
+    SDL_RenderDrawLine(renderer, 0, rendererInfo.h, rendererInfo.w, rendererInfo.h);
 }
 
 ////
@@ -51,7 +48,7 @@ void render_world_background(int cols, int rows) {
 ////
 
 /**
- * render text hints
+ * initializes hints
  */
 void init_world_hints(char text[]) {
     SDL_Surface *surface;
@@ -75,22 +72,26 @@ void render_world_hints() {
 
     int w = 0;
     int h = 0;
-    SDL_Rect r = { 0, 0, rw, rh };
+    SDL_Rect r = { 0, 0, rendererInfo.w, rendererInfo.h };
 
     SDL_QueryTexture(hints, NULL, NULL, &w, &h);
     r.w = w;
     r.h = h;
-    r.x = (rw - r.w) / 2;
-    r.y = rh - r.h - 10;
+    r.x = (rendererInfo.w - r.w) / 2;
+    r.y = rendererInfo.h - r.h - 10;
     SDL_RenderCopy(renderer, hints, NULL, &r);
 }
 
 ////
-// loop
+// API
 ////
 
 /**
  * callback for rendering a single cell within an update loop
+ * @param cell cell status (alive, dead)
+ * @param index cell position in world data matrix
+ * @param cols world data matrix width
+ * @param rows world data matrix height
  */
 void render_world_loop_cell(char cell, int index, int cols, int rows) {
     // SDL_Log("cell index %d, status %d", index, cell);
@@ -111,18 +112,18 @@ void render_world_loop_cell(char cell, int index, int cols, int rows) {
 ////
 
 /**
- * render world screen
+ * initialize this screen
+ * @param world world pattern
  */
 void screen_world_init(Pattern *world) {
     init_world_hints("press enter for restart, space for pause");
 }
 
 /**
- * render world screen
+ * render this screen
+ * @param world world pattern
  */
 void screen_world_render(Pattern *world) {
-    SDL_RenderGetLogicalSize(renderer, &rw, &rh);
-
     renderer_set_color(Colors.bg);
     SDL_RenderClear(renderer);
 
@@ -139,6 +140,14 @@ void screen_world_render(Pattern *world) {
 }
 
 /**
+ * manages events for this screen
+ * @param e SDL Event from main()
+ * @param App global App state from main(). The state may be updated
+ * @param world world pattern
+ */
+void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world) {}
+
+/**
  * clear world screen
  */
 void screen_world_clear() {
@@ -148,7 +157,7 @@ void screen_world_clear() {
 }
 
 /**
- * clear world screen
+ * destroys this screen and components
  */
 void screen_world_destroy() {
       SDL_DestroyTexture(hints);

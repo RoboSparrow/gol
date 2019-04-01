@@ -2,30 +2,42 @@
  * definitions for app state
  */
 
-#ifndef _RENDERER_H__
+#ifndef __RENDERER_H__
 #define __RENDERER_H__
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
 #include "pattern.h"
+#include "state.h"
 
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
 extern TTF_Font *font;
+
+typedef struct _RendererInfo {
+   int w;
+   int h;
+} RendererInfo;
+
+//extern RendererInfo rendererInfo;
 
 ////
 //global
 ////
 
 void renderer_init(Pattern *world);
+void renderer_update();
 void renderer_destroy();
 
 ////
 // start screen
 ////
 
-void render_start(Pattern *world);
+void screen_start_init();
+void screen_start_render();
+void screen_start_events(SDL_Event e, GlobalState *App, Pattern *world);
+void screen_start_destroy();
 
 ////
 // world screen
@@ -33,6 +45,7 @@ void render_start(Pattern *world);
 
 void screen_world_init();
 void screen_world_render(Pattern *world);
+void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world);
 void screen_world_clear();
 void screen_world_destroy();
 
