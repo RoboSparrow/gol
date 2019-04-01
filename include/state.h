@@ -16,6 +16,16 @@ typedef enum {
     SDL_SCREEN_WORLD
 } SdlScreen;
 
+typedef enum {
+    APP_STATE_RUNNING,
+    APP_STATE_QUIT
+} AppState;
+
+typedef struct GlobalState {
+   AppState state;
+   SdlScreen screen;
+} GlobalState;
+
 typedef struct SdlColors {
    SDL_Color bg;
    SDL_Color fg;
