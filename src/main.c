@@ -18,9 +18,12 @@ Path FS_ROOT_DIR;
 
 int main(int argc, char* argv[]) {
 
-    int running = 1;
+    GlobalState App = {
+        .state = APP_STATE_RUNNING,
+        .screen = SDL_SCREEN_START
+    };
+
     int paused = 0;
-    SdlScreen screen = SDL_SCREEN_WORLD;
 
     Path patternfile = "";
     SDL_Event e;
@@ -33,7 +36,7 @@ int main(int argc, char* argv[]) {
     EXIT_NULL(world, "could not allocate memory(1) for world pattern");
 
     // merge args
-    init_parse_args(argc, argv, world, patternfile);
+    init_parse_args(argc, argv, &App, world, patternfile);
 
     // init world data
     world->data = gol_allocate_data(world->cols, world->rows);
@@ -59,25 +62,37 @@ int main(int argc, char* argv[]) {
     int saved = pattern_save_file("save/autosave.rle", world);
     EXIT_MINUS(saved, "main: could not save pattern file (autosave)\n");
 
-    // init sdl
+    // init sdl & screens
     renderer_init(world);
-    // init screens
+    screen_start_init();
     screen_world_init();
 
     // add a small delay so that return key event from cli is not captured
     // TODO use var
     SDL_Delay(100);
 
-    while (running) {
+    while (App.state < APP_STATE_QUIT) {
+        renderer_update();
+
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
-                running = 0;
+                App.state  = APP_STATE_QUIT;
+            }
+
+            switch (App.screen) {
+                case SDL_SCREEN_WORLD:
+                    screen_world_events(e, &App, world);
+                break;
+
+                case SDL_SCREEN_START:
+                default:
+                    screen_start_events(e, &App, world);
             }
 
             if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
                     case SDLK_ESCAPE:
-                        running = 0;
+                        App.screen = SDL_SCREEN_START;
                     break;
                     case SDLK_SPACE:
                         paused = !paused;
@@ -107,26 +122,28 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        switch (screen) {
-            case SDL_SCREEN_START:
-                // render_start(world);
-            break;
+        switch (App.screen) {
             case SDL_SCREEN_WORLD:
                 if (!paused) {
                     screen_world_render(world);
                 }
             break;
-            // exit(0); // DEV valgrind with SDL
 
+            case SDL_SCREEN_START:
+            default:
+                screen_start_render(world);
         }
 
         SDL_Delay(50); // 15 fps
+        // exit(0); // DEV valgrind with SDL
     }
 
-    running = 0;
-    // exit screens an renderer
+    // exit screens sdl
+    screen_start_destroy();
     screen_world_destroy();
     renderer_destroy();
+
+    // free data
     pattern_free_pattern(world);
 
     return 0;
