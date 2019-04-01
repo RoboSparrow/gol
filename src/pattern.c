@@ -129,14 +129,14 @@ void pattern_free_patterns(Pattern **patterns, int len) {
 }
 
 /**
- * free a pattern list
+ * free a pattern list and reset counter
  * @param patterns reference to an initialized array of Pattern structs,
- * @param len length of list
  */
 void pattern_free_patternlist(PatternList *list) {
     if(list != NULL) {
         pattern_free_patterns(list->patterns, list->len);
     }
+    list->patterns = NULL;
     list->len = 0;
 }
 
