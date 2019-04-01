@@ -37,13 +37,10 @@ void pattern_free_pattern(Pattern *pattern) {
  * @param dirname  name of tartget dir within the directory of the executable
  * @param ext file extension to filter directory for
  */
-PatternList *pattern_load_patternlist(char *dirname) {
+int pattern_load_patternlist(char *dirname, PatternList *list) {
 
-    PatternList li = {
-        .len = 0,
-        .patterns = NULL,
-    };
-    PatternList *list = &li;
+    // free and set len to zero
+    pattern_free_patternlist(list);
 
     // open dir
     DIR *dir;
@@ -56,7 +53,7 @@ PatternList *pattern_load_patternlist(char *dirname) {
     dir = opendir(path);
     if(dir == NULL) {
         LOG_ERROR_F("Unable able to open dir %s.", path);
-        return NULL;
+        return -1;
     }
 
     // get length
@@ -76,7 +73,7 @@ PatternList *pattern_load_patternlist(char *dirname) {
     list->patterns = malloc(len * sizeof(Pattern *));
     if(list->patterns == NULL) {
         LOG_ERROR("rle-parser: unable to re-allocate memory for patterns.");
-        return NULL;
+        return -1;
     }
 
     // read files and parse meta data
@@ -114,7 +111,7 @@ PatternList *pattern_load_patternlist(char *dirname) {
 
     closedir(dir);
 
-    return list;
+    return list->len;
 }
 
 /**
@@ -140,6 +137,7 @@ void pattern_free_patternlist(PatternList *list) {
     if(list != NULL) {
         pattern_free_patterns(list->patterns, list->len);
     }
+    list->len = 0;
 }
 
 /**

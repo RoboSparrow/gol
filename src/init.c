@@ -6,6 +6,7 @@
 
 #include "pattern.h"
 #include "utils.h"
+#include "state.h"
 
 /**
  * helper input for init_parse_args -l
@@ -53,7 +54,7 @@ void init_set_rootdir(int argc, char* argv[], Path path) {
  * parses cli args in to world pattern
  * @param param file path to be filled with file path on option -f
  */
-void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
+void init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, Path patternfile) {
     int opt = 0;
     int cols = 0;
     int rows = 0;
@@ -68,19 +69,20 @@ void init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
                 rows = atoi(optarg);
             break;
             case 'l': {
-                PatternList *list = pattern_load_patternlist("patterns");
-                if(list == NULL) {
-                    LOG_ERROR("init: Unable to load pattern list.");
-                    exit(EXIT_FAILURE);
-                }
-                cli_print_patternlist(list);
+                PatternList list = { 0, NULL };
+                int loaded = pattern_load_patternlist("patterns", &list);
+                EXIT_MINUS(loaded, "init: Unable to load pattern list.");
+                cli_print_patternlist(&list);
 
-                int selected = select_pattern(list->len);
+                int selected = select_pattern(list.len);
 
-                printf("=> %s\n", list->patterns[selected - 1]->file);
-                strcpy(patternfile, list->patterns[selected - 1]->file);
+                printf("=> %s\n", list.patterns[selected - 1]->file);
+                strcpy(patternfile, list.patterns[selected - 1]->file);
 
-                pattern_free_patternlist(list);
+                // switch to world screen
+                app->screen = SDL_SCREEN_WORLD;
+
+                pattern_free_patternlist(&list);
                 // exit(EXIT_SUCCESS);
             }
             break;
