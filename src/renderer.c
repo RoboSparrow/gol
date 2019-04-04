@@ -30,7 +30,7 @@ void renderer_init(Pattern *world) {
     window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
     EXIT_NULL_F(window, "Failed to create SDL window: %s.", SDL_GetError());
 
-    renderer = SDL_CreateRenderer(window, -1, 0);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     EXIT_NULL_F(renderer, "Failed to create SDL renderer: %s.", SDL_GetError());
 
     // SDL ttf
