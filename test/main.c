@@ -55,5 +55,15 @@ int main(int argc, char* argv[]) {
     test_cell_loadsave_blanklines(pattern);
     pattern_free_pattern(pattern);
 
+    GROUP("GenList");
+    test_genlist_init();
+    test_genlist_push();
+    test_genlist_push_realloc();
+    test_genlist_set();
+    test_genlist_get();
+    test_genlist_delete();
+    test_genlist_flush();
+    test_genlist_free();
+
     return 0;
 }

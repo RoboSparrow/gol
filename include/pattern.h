@@ -6,6 +6,7 @@
 #define __PATTERN_H__
 
 #include <limits.h>
+
 #include "utils.h"
 
 #define LINE_BOUNDS 255 /** max line length, for header and comment lines only */
@@ -15,6 +16,11 @@ typedef enum {
     PATTERN_META,
     PATTERN_FULL,
 } pattern_state;
+
+typedef enum {
+    PATTERN_CENTER,
+    PATTERN_TOPLEFT
+} PatternOrigin;
 
 typedef struct pattern {
     char title[LINE_BOUNDS];
@@ -26,20 +32,16 @@ typedef struct pattern {
     char *data;
 } Pattern;
 
-typedef struct patternList {
-    int len;
-    Pattern **patterns;
-} PatternList;
-
-int pattern_load_patternlist(char *dirname, PatternList *list);
-void pattern_free_patternlist(PatternList *list);
+int pattern_load_patternlist(char *dirname, GenList *list);
+void pattern_free_patternlist(GenList *list);
 
 Pattern *pattern_allocate_pattern();
 void pattern_free_pattern(Pattern *pattern);
 
-void pattern_copy_pattern(Pattern *src, Pattern *targ);
 void pattern_print_pattern(Pattern *pattern);
 
 int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state);
 int pattern_save_file(char *file, Pattern *pattern);
+
+int pattern_load_file_and_merge(char *file, Pattern *world, int offsetX, int offsetY, PatternOrigin origin);
 #endif

@@ -1,27 +1,23 @@
-- main root dir:
+- path init -> main root dir:
     - system agnostic way to find dir
-    - protect root dir var
-x ~~rle-parser: better identification of comment lines (snprintf)~~
-x rle_load_meta & rle_load_data, option for using same filepointer
-x pattern, meta alloc: check null
-x pattern offset center option
-x pattern struct: ~~add offsets~~, data, ~~type props~~
-x rle-parser: save as rle
-x cell-parser: http://conwaylife.com/wiki/Plaintext
-x terminate char * data with nul so we can safely use string.h
-- cell parser, save pattern: add compress (trailing dead cells)
+- cell parser -> save pattern: add compress (trailing dead cells)
 - improve utils functons, add tests
 x app state struct
-- replace pattern list with generic array (c++ vector like) solution
+x replace pattern list with generic array (c++ vector like) solution
+- genlist functions, return int status insead void func to check success => pattern_load_patternlist()
+- pattern and widget allocate/free pointers (char*, SDl structs)
 
 sdl:
 - view pattern static (for preview and future editor)
-- calculate screen dims and set dynamic size
+- calculate screen canvas dims and set dynamic size
 - zoom (center world on start)
+- widgets: error handling
+- sdl message overlay (errors, notifications etc)
 
 milestones
  x rle/cell parser
- - load/save screen
+ - load pattern screen
+ - load/save game screen
  - editor screen
  - win32 support (fs)
  - wasm

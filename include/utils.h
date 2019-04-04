@@ -25,4 +25,20 @@ void str_tolower(char *str);
 char *str_getfileext(char *filename);
 int path_build(char *segment, Path path);
 
+#define GENLIST_INIT_SIZE 5
+
+typedef struct GenList {
+    void **items;
+    int size;
+    int length;
+} GenList;
+
+void genlist_init(GenList *list);
+void genlist_push(GenList *list, void *item);
+
+void genlist_set(GenList *list, int index, void *item);
+void *genlist_get(GenList *list, int index);
+void genlist_delete(GenList *list, int index);
+void genlist_flush(GenList *list);
+void genlist_free(GenList *list);
 #endif

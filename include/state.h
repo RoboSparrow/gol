@@ -17,8 +17,9 @@ typedef enum {
 } SdlScreen;
 
 typedef enum {
+    APP_STATE_QUIT,
+    APP_STATE_ONCE,
     APP_STATE_RUNNING,
-    APP_STATE_QUIT
 } AppState;
 
 typedef struct GlobalState {

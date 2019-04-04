@@ -1,4 +1,3 @@
-// adapted to c: http://headerphile.com/sdl2/sdl2-part-4-making-things-happen/
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>

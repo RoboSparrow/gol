@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 
     GlobalState App = {
         .state = APP_STATE_RUNNING,
-        .screen = SDL_SCREEN_START
+        .screen = SDL_SCREEN_START,
     };
 
     int paused = 0;
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
     // TODO use var
     SDL_Delay(100);
 
-    while (App.state < APP_STATE_QUIT) {
+    while (App.state > APP_STATE_QUIT) {
         renderer_update();
 
         while (SDL_PollEvent(&e) != 0) {
@@ -135,7 +135,11 @@ int main(int argc, char* argv[]) {
         }
 
         SDL_Delay(50); // 15 fps
-        // exit(0); // DEV valgrind with SDL
+
+        // DEV valgrind with SDL
+        if(App.state == APP_STATE_ONCE) {
+            exit(0);
+        }
     }
 
     // exit screens sdl

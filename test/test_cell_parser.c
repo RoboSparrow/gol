@@ -1,4 +1,3 @@
-// adapted to c: http://headerphile.com/sdl2/sdl2-part-4-making-things-happen/
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -112,7 +111,7 @@ void test_cell_loadsave_blanklines(Pattern *pattern) {
     int loaded1 = pattern_load_file("./48p31.cells", pattern, PATTERN_FULL);
     assert(loaded1 >= 0);
     assert(strcmp(pattern->title, cell_48p31.title) == 0);
-    assert(strcmp( pattern->description, cell_48p31.description) == 0);
+    assert(strcmp(pattern->description, cell_48p31.description) == 0);
     assert(pattern->cols == cell_48p31.cols);
     assert(pattern->rows == cell_48p31.rows);
     assert(pattern->state == PATTERN_FULL);

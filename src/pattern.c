@@ -7,6 +7,7 @@
 #include "gol.h"
 #include "rle-parser.h"
 #include "cell-parser.h"
+#include "utils.h"
 
 /**
  * creates pattern with zero values
@@ -35,12 +36,13 @@ void pattern_free_pattern(Pattern *pattern) {
 /**
  * creates pattern list - read a directory of files, filter out pattern files by extension and parse meta data into a list
  * @param dirname  name of tartget dir within the directory of the executable
- * @param ext file extension to filter directory for
+ * @param list Pointer to Genlist
+ * @return list length or -1 on error
  */
-int pattern_load_patternlist(char *dirname, PatternList *list) {
+int pattern_load_patternlist(char *dirname, GenList *list) {
 
     // free and set len to zero
-    pattern_free_patternlist(list);
+    genlist_flush(list);
 
     // open dir
     DIR *dir;
@@ -68,14 +70,6 @@ int pattern_load_patternlist(char *dirname, PatternList *list) {
     }
     rewinddir(dir);
 
-    // allocate mem for patterns
-    list->len = len;
-    list->patterns = malloc(len * sizeof(Pattern *));
-    if(list->patterns == NULL) {
-        LOG_ERROR("rle-parser: unable to re-allocate memory for patterns.");
-        return -1;
-    }
-
     // read files and parse meta data
     int i = 0;
     e = readdir(dir);
@@ -101,7 +95,7 @@ int pattern_load_patternlist(char *dirname, PatternList *list) {
                 if(loaded != PATTERN_META) {
                     LOG_ERROR_F("error loading pattern file %s", pattern->file);
                 } else {
-                    list->patterns[i] = pattern;
+                    genlist_push(list, pattern);
                     i++;
                 }
         }
@@ -111,33 +105,24 @@ int pattern_load_patternlist(char *dirname, PatternList *list) {
 
     closedir(dir);
 
-    return list->len;
+    return list->length;
 }
 
 /**
- * free a collection of patterns
- * @param patterns reference to an initialized array of Pattern structs,
- * @param len length of list
+ * free a GenList of pattern pointers and reset list to  zero length
+ * @param list Pointer to Genlist
  */
-void pattern_free_patterns(Pattern **patterns, int len) {
-    if(patterns != NULL) {
-        for(int i = 0; i < len; i++) {
-            pattern_free_pattern(patterns[i]);
-        }
-        free(patterns);
+void pattern_free_patternlist(GenList *list) {
+    if(list->items == NULL) {
+        return;
     }
-}
 
-/**
- * free a pattern list and reset counter
- * @param patterns reference to an initialized array of Pattern structs,
- */
-void pattern_free_patternlist(PatternList *list) {
-    if(list != NULL) {
-        pattern_free_patterns(list->patterns, list->len);
+    for (int i = 0; i < list->length; i++) {
+        Pattern *pattern = (Pattern *) genlist_get(list, i);
+        pattern_free_pattern(pattern);
     }
-    list->patterns = NULL;
-    list->len = 0;
+
+    genlist_flush(list);
 }
 
 /**
@@ -222,4 +207,38 @@ int pattern_save_file(char *file, Pattern *pattern) {
 
     LOG_ERROR_F("pattern: No parser found for file (save)%s", file);
     return -1;
+}
+
+/**
+ * Load pattern from file and merge into target
+ * @param file file to load
+ * @param pattern allocated target Pattern to lmerge into
+ * @param offsetX x-offset for instering into target pattern
+ * @param offsetY y-offset for instering into target pattern
+ * @param origin flag for alignment of pattern relative to world offset
+ * @return -1 on error or 0
+ */
+int pattern_load_file_and_merge(char *file, Pattern *world, int offsetX, int offsetY, PatternOrigin origin) {
+    Pattern *pattern = pattern_allocate_pattern();
+    if (pattern == NULL) {
+        LOG_ERROR_F("Could not allocate memory for pattern file %s\n", file);
+        return -1;
+    }
+
+    int loaded = pattern_load_file(file, pattern, PATTERN_FULL);
+    if (loaded < 0) {
+        LOG_ERROR_F("Could not allocate memory for pattern file %s\n", file);
+        return -1;
+    }
+
+    switch (origin) {
+        case PATTERN_CENTER:
+            gol_merge_data(pattern, world, offsetX - (pattern->cols/2), offsetY  - (pattern->rows/2));
+        break;
+        default:
+            gol_merge_data(pattern, world, offsetX, offsetY);
+    }
+
+    pattern_free_pattern(pattern);
+    return 0;
 }

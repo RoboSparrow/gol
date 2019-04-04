@@ -7,7 +7,6 @@
 
 #include "utils.h"
 #include "gol.h"
-#include "paint.h"
 #include "state.h"
 #include "rle-parser.h"
 #include "pattern.h"
@@ -42,4 +41,13 @@ void test_cell_loadfile_full(Pattern *pattern);
 void test_cell_savefile(Pattern *pattern);
 
 void test_cell_loadsave_blanklines(Pattern *pattern);
+
+void test_genlist_init();
+void test_genlist_push();
+void test_genlist_push_realloc();
+void test_genlist_set();
+void test_genlist_get();
+void test_genlist_delete();
+void test_genlist_flush();
+void test_genlist_free();
 #endif
