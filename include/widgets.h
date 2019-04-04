@@ -6,6 +6,7 @@
 #define __WIDGETS_H__
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "state.h" //todo remove dependency
 #include "pattern.h" //todo remove dependency
 
@@ -14,6 +15,7 @@ typedef enum {
     WSTATE_DEFAULT,
     WSTATE_HOVER,
     WSTATE_ACTIVE,
+    WSTATE_RELEASED,
     WSTATE_MAX,
 } WidgetState;
 
@@ -28,16 +30,21 @@ typedef struct Widget {
     char *text;
     int x;
     int y;
+
     SDL_Color text_color;
     SDL_Color bg_color;
+    SDL_Color border_color;
+
     SDL_Rect rect;
     SDL_Texture *default_texture;
     SDL_Texture *hover_texture;
 } Widget;
 
 int widgets_is_in_rect(int x, int y, SDL_Rect *rect);
+void widgets_print_widgets(Widget *widget);
 
-Widget *widgets_button_new(char *text);
+// button
+
 void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, int y);
 void widgets_button_render(Widget *btn, SDL_Renderer *ren);
 void widgets_btn_event(Widget *btn, SDL_Event e);

@@ -11,10 +11,11 @@
 /**
  * helper input for init_parse_args -l
  */
-void cli_print_patternlist(PatternList *list) {
-    for(int i = 0; i < list->len; i++) {
-        printf("%d) %s (%dx%d)\n", i + 1, list->patterns[i]->title, list->patterns[i]->cols, list->patterns[i]->rows);
-        printf("    * %s\n", list->patterns[i]->description);
+void cli_print_patternlist(GenList *list) {
+    for(int i = 0; i < list->length; i++) {
+        Pattern *pattern = (Pattern*) genlist_get(list, i);
+        printf("%d) %s (%dx%d)\n", i + 1, pattern->title, pattern->cols, pattern->rows);
+        printf("    * %s\n", pattern->description);
     }
 }
 
@@ -59,8 +60,8 @@ void init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, P
     int cols = 0;
     int rows = 0;
 
-    char usage[] = "usage: %s [-l listpatternsandselect] [-c numberofcols] [-r numberofrows] [-p pathtopatternfile]\n";
-    while ((opt = getopt (argc, argv, "r:c:p:h:l")) != -1) {
+    char usage[] = "usage: %s [-l listpatternsandselect] [-c numberofcols] [-r numberofrows] [-p pathtopatternfile][-R enterrandomworld]\n";
+    while ((opt = getopt(argc, argv, "r:c:p:h:lRV")) != -1) {
         switch (opt)  {
             case 'c':
                 cols = atoi(optarg);
@@ -69,25 +70,36 @@ void init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, P
                 rows = atoi(optarg);
             break;
             case 'l': {
-                PatternList list = { 0, NULL };
-                int loaded = pattern_load_patternlist("patterns", &list);
+                GenList patterns;
+                genlist_init(&patterns);
+                int loaded = pattern_load_patternlist("patterns", &patterns);
                 EXIT_MINUS(loaded, "init: Unable to load pattern list.");
-                cli_print_patternlist(&list);
+                cli_print_patternlist(&patterns);
 
-                int selected = select_pattern(list.len);
+                int selected = select_pattern(patterns.length);
 
-                printf("=> %s\n", list.patterns[selected - 1]->file);
-                strcpy(patternfile, list.patterns[selected - 1]->file);
+                Pattern *pattern = (Pattern *) genlist_get(&patterns, selected - 1);
+                printf("=> %s\n", pattern->file);
+                strcpy(patternfile, pattern->file);
 
                 // switch to world screen
                 app->screen = SDL_SCREEN_WORLD;
 
-                pattern_free_patternlist(&list);
+                genlist_free(&patterns);
                 // exit(EXIT_SUCCESS);
             }
             break;
             case 'p':
                 path_build(optarg, patternfile);
+            break;
+            // directly go to random world
+            case 'R':
+                app->screen =  SDL_SCREEN_WORLD;
+            break;
+            // valgrind: run once only
+            case 'V':
+                printf("-V option (valgrind) run loop once and exit\n");
+                app->state = APP_STATE_ONCE;
             break;
             case 'h':
             case '?':

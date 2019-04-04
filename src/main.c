@@ -47,14 +47,8 @@ int main(int argc, char* argv[]) {
         // random world
         gol_random(world);
     } else {
-        Pattern *pattern = pattern_allocate_pattern();
-        EXIT_NULL(world, "main: could not allocate memory for pattern file\n");
-
-        int loaded = pattern_load_file(patternfile, pattern, PATTERN_FULL);
-        EXIT_MINUS(loaded, "main: could not load pattern file\n");
-        gol_merge_data(pattern, world, (world->cols - pattern->cols) / 2, (world->rows - pattern->rows) / 2);
-
-        pattern_free_pattern(pattern);
+        int merged = pattern_load_file_and_merge(patternfile, world, world->cols / 2, world->rows / 2, PATTERN_CENTER);
+        EXIT_MINUS(merged, "main: could not load pattern file\n");
     }
 
     // autosave world
@@ -105,17 +99,8 @@ int main(int argc, char* argv[]) {
                                 // random world
                                 gol_random(world);
                             } else {
-                                // pattern from file
-                                gol_clear_data(world->data);
-
-                                Pattern *pattern = pattern_allocate_pattern();
-                                EXIT_NULL(world, "main: could not allocate memory for pattern file\n");
-
-                                int loaded = pattern_load_file(patternfile, pattern, PATTERN_FULL);
-                                EXIT_MINUS(loaded, "main: could not load pattern file\n");
-
-                                gol_merge_data(pattern, world, (world->cols - pattern->cols) / 2, (world->rows - pattern->rows) / 2);
-                                pattern_free_pattern(pattern);
+                                int merged = pattern_load_file_and_merge(patternfile, world, world->cols / 2, world->rows / 2, PATTERN_CENTER);
+                                EXIT_MINUS(merged, "main: could not load pattern file\n");
                             }
                     break;
                 }

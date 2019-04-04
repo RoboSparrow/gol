@@ -2,27 +2,40 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "widgets.h"
+#include "renderer.h"
 
-SDL_Surface *create_rect_surface(SDL_Rect *rect, SDL_Color *col) {
+extern SDL_Window* window;
+
+SDL_Surface *create_rect_surface(SDL_Rect *rect, SDL_Color *bgcolor, SDL_Color *bordercolor) {
     SDL_Surface *s;
-    s = SDL_CreateRGBSurface(0, rect->w, rect->h, 32, 0, 0, 0, 0);
+
+    s = SDL_CreateRGBSurfaceWithFormat(0, rect->w, rect->h, 32, SDL_GetWindowPixelFormat(window));
     if (s == NULL) {
         SDL_Log("SDL_CreateRGBSurface() failed: %s", SDL_GetError());
         return NULL;
     }
-    SDL_FillRect(s, NULL, SDL_MapRGB(s->format, col->r, col->b, col->g));
-    return s;
-}
+    SDL_SetSurfaceBlendMode(s, SDL_BLENDMODE_NONE);
 
-Widget *widgets_button_new(char *text) {
-    Widget _btn = {
-        .state = WSTATE_DEFAULT,
-        .text = text,
-        .text_color = { 0, 0, 0 },
-        .bg_color = { 255, 255, 255 }
-    };
-    Widget *btn = &_btn;
-    return btn;
+    Uint32 ubgcol = SDL_MapRGB(s->format, bgcolor->r, bgcolor->b, bgcolor->g);
+    SDL_FillRect(s, NULL, ubgcol);
+
+    if(bordercolor != NULL) {
+        Uint32 ubdrcol = SDL_MapRGB(s->format, bordercolor->r, bordercolor->b, bordercolor->g);
+
+        SDL_Rect top = { 0, 0, rect->w, 1 };
+        SDL_FillRect(s, &top, ubdrcol);
+
+        SDL_Rect left = { 0, 0, 1, rect->h };
+        SDL_FillRect(s, &left, ubdrcol);
+
+        SDL_Rect right = { rect->w - 1, 0, 1, rect->h };
+        SDL_FillRect(s, &right, ubdrcol);
+
+        SDL_Rect bottom = { 0, rect->h - 1 , rect->w, 1 };
+        SDL_FillRect(s, &bottom, ubdrcol);
+    }
+
+    return s;
 }
 
 void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, int y) {
@@ -37,7 +50,7 @@ void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, 
     SDL_Rect fgr = {  margin, margin, fgs->w, fgs->h };
     SDL_Rect bgr = { x, y, fgs->w + (2 * margin), fgs->h + (2 * margin) };
 
-    SDL_Surface *bgs = create_rect_surface(&bgr, &(btn->bg_color));
+    SDL_Surface *bgs = create_rect_surface(&bgr, &(btn->bg_color), &(btn->border_color));
     if (SDL_BlitSurface(fgs, NULL, bgs, &fgr)) {
         SDL_Log("SDL_BlitSurface() failed: %s", SDL_GetError());
         return;
@@ -50,7 +63,7 @@ void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, 
     }
 
     SDL_Surface *h_fgs = TTF_RenderText_Solid(font, btn->text, btn->bg_color);
-    SDL_Surface *h_bgs = create_rect_surface(&bgr, &(btn->text_color));
+    SDL_Surface *h_bgs = create_rect_surface(&bgr, &(btn->text_color), &(btn->border_color));
 
     if (SDL_BlitSurface(h_fgs, NULL, h_bgs, &fgr)) {
         SDL_Log("SDL_BlitSurface() failed: %s", SDL_GetError());
@@ -79,17 +92,26 @@ void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, 
 }
 
 void widgets_button_render(Widget *btn, SDL_Renderer *ren) {
+    int ok = 0;
     switch(btn->state) {
         case WSTATE_DEFAULT:
-            SDL_RenderCopy(ren, btn->default_texture, NULL, &(btn->rect));
+            if(btn->default_texture != NULL) {
+                ok = SDL_RenderCopy(ren, btn->default_texture, NULL, &(btn->rect));
+            }
             break;
         case WSTATE_HOVER:
         case WSTATE_ACTIVE:
-            SDL_RenderCopy(ren, btn->hover_texture, NULL, &(btn->rect));
+        case WSTATE_RELEASED:
+            if(btn->hover_texture != NULL) {
+                ok = SDL_RenderCopy(ren, btn->hover_texture, NULL, &(btn->rect));
+            }
             break;
         case WSTATE_NONE:
         default:
             break;
+    }
+    if (ok < 0) {
+        SDL_Log("SDL_RenderCopy() failed: %s", SDL_GetError());
     }
 }
 
@@ -105,6 +127,10 @@ void widgets_btn_event(Widget *btn, SDL_Event e) {
     }
 
     if (e.type == SDL_MOUSEBUTTONUP) {
+        if(btn->state == WSTATE_ACTIVE) {
+            btn->state = WSTATE_RELEASED;
+            return;
+        }
         btn->state = WSTATE_DEFAULT;
         return;
     }

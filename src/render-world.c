@@ -8,10 +8,10 @@
 #include "renderer.h"
 
 extern SDL_Renderer *renderer;
-extern TTF_Font *font;
 
 extern RendererInfo rendererInfo;
 extern SdlColors Colors;
+extern SdlFonts Fonts;
 
 SDL_Rect rect = {
     .x = 0,
@@ -53,7 +53,7 @@ void render_world_background(int cols, int rows) {
 void init_world_hints(char text[]) {
     SDL_Surface *surface;
 
-    if (!(surface = TTF_RenderUTF8_Solid(font, text, Colors.text))) {
+    if (!(surface = TTF_RenderUTF8_Solid(Fonts.body, text, Colors.text))) {
         LOG_ERROR_F("Failed to render text: %p.", TTF_GetError());
         return;
     }

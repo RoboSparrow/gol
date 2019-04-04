@@ -1,14 +1,17 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <string.h>
+#include <malloc.h>
 
 #include "state.h"
 #include "renderer.h"
 #include "widgets.h"
 #include "pattern.h"
+#include "gol.h"
 
 extern SDL_Renderer *renderer;
-extern TTF_Font *font;
 extern SdlColors Colors;
+extern SdlFonts Fonts;
 extern RendererInfo rendererInfo;
 
 Widget _btn_enter = { WSTATE_DEFAULT, "Enter game" };
@@ -17,18 +20,24 @@ Widget *btn_enter =  &_btn_enter;
 Widget _btn_quit = { WSTATE_DEFAULT, "Quit Game" };
 Widget *btn_quit =  &_btn_quit;
 
-PatternList _patterns = { 0, NULL };
-PatternList *patterns = &_patterns;
+GenList patterns;
+GenList patternWidgets;
+
+////
+// control buttons
+////
 
 /**
- * actions for "enter" button
+ * events for "enter" button
  * @param e SDL Event from main()
  * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void btn_enter_actions(SDL_Event e, GlobalState *App, Pattern *world) {
+void events_btn_enter(SDL_Event e, GlobalState *App, Pattern *world) {
+    widgets_btn_event(btn_enter, e);
+
     switch(btn_enter->state) {
-        case WSTATE_ACTIVE:
+        case WSTATE_RELEASED:
             printf("Enter world screen..\n");
             SDL_Delay(250);
             App->screen = SDL_SCREEN_WORLD;
@@ -39,14 +48,16 @@ void btn_enter_actions(SDL_Event e, GlobalState *App, Pattern *world) {
 }
 
 /**
- * actions for "quit" button
+ * events for "quit" button
  * @param e SDL Event from main()
  * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void btn_quit_actions(SDL_Event e, GlobalState *App, Pattern *world) {
+void events_btn_quit(SDL_Event e, GlobalState *App, Pattern *world) {
+    widgets_btn_event(btn_quit, e);
+
     switch(btn_quit->state) {
-        case WSTATE_ACTIVE:
+        case WSTATE_RELEASED:
             printf("Quitting app..\n");
             SDL_Delay(250);
             App->state = APP_STATE_QUIT;
@@ -56,25 +67,137 @@ void btn_quit_actions(SDL_Event e, GlobalState *App, Pattern *world) {
     }
 }
 
+////
+// pattern widgets
+////
+
+/**
+ * initializes and builds pattern widgets on screen enter
+ * @param startX x position for group on canvas
+ * @param startY y position for group on canvas
+ * @param xMargin x margin for individiual widget
+ * @param yMargin y margin for individiual widget
+ */
+void init_pattern_widgets(int startX, int startY, int xMargin, int yMargin) {
+
+    int x = startX;
+    int y = startY;
+
+    if(!patterns.length) {
+        return;
+    }
+    Widget *widget;
+    Pattern *pattern;
+    for (int i = 0; i < patterns.length; i++) {
+        pattern = (Pattern *) genlist_get(&patterns, i);
+
+        widget = malloc(sizeof(Widget));
+
+        widget->state = WSTATE_DEFAULT;
+        widget->text = malloc(strlen(pattern->title));
+        // todo check alloc
+        strcpy(widget->text, pattern->title);
+        widget->text_color = Colors.text;
+        widget->bg_color = Colors.bg;
+        widget->border_color = Colors.text;
+
+        widgets_button_init(widget, renderer, Fonts.body, x + xMargin, y);
+        genlist_push(&patternWidgets, widget);
+
+        y += (yMargin + widget->rect.h);
+    }
+}
+
+/**
+ * renders pattern widgets
+ */
+void render_pattern_widgets() {
+
+    if(!patternWidgets.length) {
+        return;
+    }
+
+    Widget *widget;
+    for(int i = 0; i < patternWidgets.length; i++) {
+        widget = (Widget *) genlist_get(&patternWidgets, i);
+        // widgets_print_widgets(widget);
+        widgets_button_render(widget, renderer);
+    }
+}
+
+/**
+ * events for pattern widgets
+ * @param e SDL Event from main()
+ * @param App global App state from main(). The state may be updated
+ * @param world world pattern
+ */
+void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
+
+    if(!patternWidgets.length) {
+        return;
+    }
+
+    Widget *widget;
+    Pattern *pattern;
+
+    for(int i = 0; i < patternWidgets.length; i++) {
+        widgets_btn_event(widget, e);
+
+        widget = (Widget *) genlist_get(&patternWidgets, i);
+        pattern = (Pattern *) genlist_get(&patterns, i);
+
+        switch(widget->state) {
+            case WSTATE_RELEASED:
+
+                printf("action %s: %s..\n", widget->text, pattern->file);
+                gol_clear_data(world->data);
+                int merged = pattern_load_file_and_merge(pattern->file, world, world->cols / 2, world->rows / 2, PATTERN_CENTER);
+                //// TODO screen message!
+                EXIT_MINUS(merged, "main: could not load pattern file\n");
+                App->screen = SDL_SCREEN_WORLD;
+
+                break;
+            default:
+                break;
+        }
+
+    }
+}
+
+////
+// screen api
+////
+
 /**
  * initialize this screen
  * @param world world pattern
  */
 void screen_start_init() {
-    btn_enter->text_color = Colors.text;
-    btn_enter->bg_color = Colors.bg;
-    widgets_button_init(btn_enter, renderer, font, 5, 5);
 
-    btn_quit->text_color = Colors.text;
-    btn_quit->bg_color = Colors.bg;
-    widgets_button_init(btn_quit, renderer, font, 5 + btn_enter->rect.x + btn_enter->rect.w , 5);
+    // control buttons
+    btn_enter->text_color = Colors.bg;
+    btn_enter->bg_color = Colors.text;
+    btn_enter->border_color = Colors.text;
+    widgets_button_init(btn_enter, renderer, Fonts.body, 5, 5);
 
-    int loaded = pattern_load_patternlist("patterns", patterns);
-  printf("-----fdsfsf\n");
+    btn_quit->text_color = Colors.bg;
+    btn_quit->bg_color = Colors.text;
+    btn_quit->border_color = Colors.text;
+    widgets_button_init(btn_quit, renderer, Fonts.body, 5 + btn_enter->rect.x + btn_enter->rect.w , 5);
+
+    // pattern widget list
+    genlist_init(&patternWidgets);
+
+    // load patterns
+    genlist_init(&patterns);
+    int loaded = pattern_load_patternlist("patterns", &patterns);
+
     if(loaded < 0) {
         LOG_ERROR("init: Unable to load pattern list.");
+        return;
     }
 
+    init_pattern_widgets(0, 50, 5, 5);
 }
 
 /**
@@ -87,15 +210,7 @@ void screen_start_render() {
     widgets_button_render(btn_enter, renderer);
     widgets_button_render(btn_quit, renderer);
 
-    if(patterns->len) {
-        for(int i = 0; i < patterns->len; i++) {
-            printf("%d) %s (%dx%d)\n", i + 1, patterns->patterns[i]->title, patterns->patterns[i]->cols, patterns->patterns[i]->rows);
-            printf("    * %s\n", patterns->patterns[i]->description);
-        }
-    } else {
-        printf(" === ffff\n");
-    }
-
+    render_pattern_widgets();
     SDL_RenderPresent(renderer);
 }
 
@@ -106,11 +221,9 @@ void screen_start_render() {
  * @param world world pattern
  */
 void screen_start_events(SDL_Event e, GlobalState *App, Pattern *world) {
-    widgets_btn_event(btn_enter, e);
-    widgets_btn_event(btn_quit, e);
-
-    btn_enter_actions(e, App, world);
-    btn_quit_actions(e, App, world);
+    events_btn_enter(e, App, world);
+    events_btn_quit(e, App, world);
+    events_pattern_widgets(e, App, world);
 }
 
 /**
@@ -118,4 +231,17 @@ void screen_start_events(SDL_Event e, GlobalState *App, Pattern *world) {
  */
 void screen_start_destroy() {
     widgets_button_destroy(btn_enter);
+    widgets_button_destroy(btn_enter);
+    //todo widgets free
+    for (int i = 0; i < patternWidgets.length; i++) {
+        Widget *widget = (Widget *) genlist_get(&patternWidgets, i);
+        if(widget->text != NULL) {
+            free(widget->text);
+        }
+        widgets_button_destroy(widget);
+    }
+    genlist_free(&patternWidgets);
+
+    pattern_free_patternlist(&patterns);
+    genlist_free(&patterns);
 }
