@@ -23,7 +23,7 @@ test/*.log
 test/run*
 
 #logs
-valgrind*
+*.log
 
 # misc
 *.swp

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# @see http://www.valgrind.org/docs/manual/manual-core.html#manual-core.suppress
+# https://wiki.wxwidgets.org/Valgrind_Suppression_File_Howto
+
+echo -e "\033[0;32m => start:\033[0m"
+valgrind \
+    --tool=memcheck \
+    --leak-check=full \
+    --show-leak-kinds=all \
+    --gen-suppressions=all \
+    --track-origins=yes \
+    --verbose \
+    --log-file=valgrind-out.log \
+    --suppressions=./sdl.supp \
+    ../bin/gol -V -R
+
+echo -e "\033[0;32m => log file:\033[0m valgrind-out.log"

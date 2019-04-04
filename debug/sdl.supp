@@ -1,0 +1,49 @@
+{
+    <initSDLLeak>
+        Memcheck:Leak
+        ...
+        fun:initSDL
+        ...
+}
+{
+    <initSDLAddr4>
+        Memcheck:Addr4
+        ...
+        fun:initSDL
+        ...
+}
+{
+    <initSDLAddr8>
+        Memcheck:Addr8
+        ...
+        fun:initSDL
+        ...
+}
+{
+    <libSDLAddr4>
+        Memcheck:Addr4
+        ...
+        obj:/usr/lib/*/libSDL2-2.0.so.0.*
+        ...
+}
+{
+    <libSDLAddr8>
+        Memcheck:Addr8
+        ...
+        obj:/usr/lib/*/libSDL2-2.0.so.0.*
+        ...
+}
+{
+    <libSDLAddr1>
+        Memcheck:Addr1
+        ...
+        obj:/usr/lib/*/libSDL2-2.0.so.0.*
+        ...
+}
+{
+    <libSDLLeak>
+        Memcheck:Leak
+        ...
+        obj:/usr/lib/*/libSDL2-2.0.so.0.*
+        ...
+}
