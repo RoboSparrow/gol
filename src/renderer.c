@@ -6,10 +6,12 @@
 #include "utils.h"
 #include "renderer.h"
 
+/* define externals */
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
-TTF_Font *font = NULL;
 RendererInfo rendererInfo = { 0, 0 };
+
+extern SdlFonts Fonts;
 
 ////
 // global functions
@@ -37,13 +39,13 @@ void renderer_init(Pattern *world) {
 
     Path path;
     path_build(FONT, path);
-    int font_size = 10;
+    int font_size = 8;
 
     int tinit = TTF_Init();
     EXIT_MINUS_F(tinit, "Failed to initialize SDL_TTF: %s.", TTF_GetError());
 
-    font = TTF_OpenFont(path, font_size);
-    EXIT_NULL_F(font, "Failed to load SDL_TTF font: %s.", TTF_GetError());
+    Fonts.body = TTF_OpenFont(path, font_size);
+    EXIT_NULL_F(Fonts.body, "Failed to load SDL_TTF font: %s.", TTF_GetError());
 
     SDL_RenderSetLogicalSize(renderer, sizeX, sizeY);
 }
@@ -61,12 +63,12 @@ void renderer_update() {
  * exits Sdl and Sdl modules
  */
 void renderer_destroy() {
-    if(font) {
-        TTF_CloseFont(font);
-        font = NULL;
+    if(Fonts.body) {
+        TTF_CloseFont(Fonts.body);
+        Fonts.body = NULL;
     }
 
-    if( renderer) {
+    if(renderer) {
         SDL_DestroyRenderer(renderer);
         renderer = NULL;
     }

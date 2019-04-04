@@ -6,6 +6,7 @@
 #define __STATE_H__
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #define UNIT_SIZE 10
 #define APP_NAME "RoboSparrow's game of Life"
@@ -34,5 +35,10 @@ typedef struct SdlColors {
    SDL_Color text;
 } SdlColors;
 
+typedef struct SdlFonts {
+    TTF_Font *body;
+} SdlFonts;
+
 extern SdlColors Colors;
+extern SdlFonts Fonts;
 #endif

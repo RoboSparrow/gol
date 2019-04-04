@@ -13,7 +13,6 @@
 
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
-extern TTF_Font *font;
 
 typedef struct _RendererInfo {
    int w;
