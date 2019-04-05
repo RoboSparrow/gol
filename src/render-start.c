@@ -14,8 +14,8 @@ extern SdlColors Colors;
 extern SdlFonts Fonts;
 extern RendererInfo rendererInfo;
 
-Widget _btn_enter = { WSTATE_DEFAULT, "Enter game" };
-Widget *btn_enter =  &_btn_enter;
+Widget _btn_rand = { WSTATE_DEFAULT, "Random game" };
+Widget *btn_rand =  &_btn_rand;
 
 Widget _btn_quit = { WSTATE_DEFAULT, "Quit Game" };
 Widget *btn_quit =  &_btn_quit;
@@ -33,12 +33,14 @@ GenList patternWidgets;
  * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void events_btn_enter(SDL_Event e, GlobalState *App, Pattern *world) {
-    widgets_btn_event(btn_enter, e);
+void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
+    widgets_btn_event(btn_rand, e);
 
-    switch(btn_enter->state) {
+    switch(btn_rand->state) {
         case WSTATE_RELEASED:
-            printf("Enter world screen..\n");
+            printf("Random game...\n");
+            gol_clear_data(world->data);
+            gol_random(world);
             SDL_Delay(50);
             App->screen = SDL_SCREEN_WORLD;
             return;
@@ -177,15 +179,15 @@ void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
 void screen_start_init() {
 
     // control buttons
-    btn_enter->text_color = Colors.bg;
-    btn_enter->bg_color = Colors.text;
-    btn_enter->border_color = Colors.borders;
-    widgets_button_init(btn_enter, renderer, Fonts.body, 5, 5);
+    btn_rand->text_color = Colors.bg;
+    btn_rand->bg_color = Colors.text;
+    btn_rand->border_color = Colors.borders;
+    widgets_button_init(btn_rand, renderer, Fonts.body, 5, 5);
 
     btn_quit->text_color = Colors.bg;
     btn_quit->bg_color = Colors.text;
     btn_quit->border_color = Colors.borders;
-    widgets_button_init(btn_quit, renderer, Fonts.body, 5 + btn_enter->rect.x + btn_enter->rect.w , 5);
+    widgets_button_init(btn_quit, renderer, Fonts.body, 5 + btn_rand->rect.x + btn_rand->rect.w , 5);
 
     // pattern widget list
     genlist_init(&patternWidgets);
@@ -209,7 +211,7 @@ void screen_start_render() {
     renderer_set_color(Colors.bg);
     SDL_RenderClear(renderer);
 
-    widgets_button_render(btn_enter, renderer);
+    widgets_button_render(btn_rand, renderer);
     widgets_button_render(btn_quit, renderer);
 
     render_pattern_widgets();
@@ -223,7 +225,7 @@ void screen_start_render() {
  * @param world world pattern
  */
 void screen_start_events(SDL_Event e, GlobalState *App, Pattern *world) {
-    events_btn_enter(e, App, world);
+    events_btn_rand(e, App, world);
     events_btn_quit(e, App, world);
     events_pattern_widgets(e, App, world);
 }
@@ -232,8 +234,8 @@ void screen_start_events(SDL_Event e, GlobalState *App, Pattern *world) {
  * destroys this screen and components
  */
 void screen_start_destroy() {
-    widgets_button_destroy(btn_enter);
-    widgets_button_destroy(btn_enter);
+    widgets_button_destroy(btn_quit);
+    widgets_button_destroy(btn_rand);
     //todo widgets free
     for (int i = 0; i < patternWidgets.length; i++) {
         Widget *widget = (Widget *) genlist_get(&patternWidgets, i);
