@@ -3,7 +3,7 @@
 # @see http://www.valgrind.org/docs/manual/manual-core.html#manual-core.suppress
 # https://wiki.wxwidgets.org/Valgrind_Suppression_File_Howto
 
-echo -e "\033[0;32m => start:\033[0m"
+echo -e "\033[0;32m => start valgrind:\033[0m"
 valgrind \
     --tool=memcheck \
     --leak-check=full \

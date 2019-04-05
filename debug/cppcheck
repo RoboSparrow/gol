@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# @see http://www.valgrind.org/docs/manual/manual-core.html#manual-core.suppress
+# https://wiki.wxwidgets.org/Valgrind_Suppression_File_Howto
+
+echo -e "\033[0;32m => start valgrind:\033[0m"
+
+cppcheck \
+    --enable=all \
+    --verbose \
+    --suppress=missingIncludeSystem \
+    --output-file=./cppcheck-out.log \
+    -I ../include \
+    ../src/
+
+echo -e "\033[0;32m => log file:\033[0m cppcheck-out.log"
