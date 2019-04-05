@@ -39,7 +39,7 @@ void events_btn_enter(SDL_Event e, GlobalState *App, Pattern *world) {
     switch(btn_enter->state) {
         case WSTATE_RELEASED:
             printf("Enter world screen..\n");
-            SDL_Delay(250);
+            SDL_Delay(50);
             App->screen = SDL_SCREEN_WORLD;
             return;
         default:
@@ -141,11 +141,13 @@ void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
     Pattern *pattern;
 
     for(int i = 0; i < patternWidgets.length; i++) {
-        widgets_btn_event(widget, e);
-
         widget = (Widget *) genlist_get(&patternWidgets, i);
         pattern = (Pattern *) genlist_get(&patterns, i);
 
+        // default events
+        widgets_btn_event(widget, e);
+
+        // actions
         switch(widget->state) {
             case WSTATE_RELEASED:
 
