@@ -99,7 +99,7 @@ void init_pattern_widgets(int startX, int startY, int xMargin, int yMargin) {
         strcpy(widget->text, pattern->title);
         widget->text_color = Colors.text;
         widget->bg_color = Colors.bg;
-        widget->border_color = Colors.text;
+        widget->border_color = Colors.borders;
 
         widgets_button_init(widget, renderer, Fonts.body, x + xMargin, y);
         genlist_push(&patternWidgets, widget);
@@ -177,12 +177,12 @@ void screen_start_init() {
     // control buttons
     btn_enter->text_color = Colors.bg;
     btn_enter->bg_color = Colors.text;
-    btn_enter->border_color = Colors.text;
+    btn_enter->border_color = Colors.borders;
     widgets_button_init(btn_enter, renderer, Fonts.body, 5, 5);
 
     btn_quit->text_color = Colors.bg;
     btn_quit->bg_color = Colors.text;
-    btn_quit->border_color = Colors.text;
+    btn_quit->border_color = Colors.borders;
     widgets_button_init(btn_quit, renderer, Fonts.body, 5 + btn_enter->rect.x + btn_enter->rect.w , 5);
 
     // pattern widget list

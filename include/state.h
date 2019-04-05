@@ -10,7 +10,7 @@
 
 #define UNIT_SIZE 10
 #define APP_NAME "RoboSparrow's game of Life"
-#define FONT "assets/hellovetica.ttf"
+#define FONT "assets/NotoSans-Regular.ttf"
 
 typedef enum {
     SDL_SCREEN_START,
@@ -32,6 +32,8 @@ typedef struct SdlColors {
    SDL_Color bg;
    SDL_Color fg;
    SDL_Color grid;
+   SDL_Color contrast;
+   SDL_Color borders;
    SDL_Color text;
 } SdlColors;
 

@@ -41,7 +41,7 @@ SDL_Surface *create_rect_surface(SDL_Rect *rect, SDL_Color *bgcolor, SDL_Color *
 void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, int y) {
     int margin = 5;
 
-    SDL_Surface *fgs = TTF_RenderText_Solid(font, btn->text, btn->text_color);
+    SDL_Surface *fgs = TTF_RenderText_Blended(font, btn->text, btn->text_color);
     if (fgs == NULL) {
         SDL_Log("TTF_RenderText_Solid failed: %s", SDL_GetError());
         return;
@@ -62,7 +62,7 @@ void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, 
         return;
     }
 
-    SDL_Surface *h_fgs = TTF_RenderText_Solid(font, btn->text, btn->bg_color);
+    SDL_Surface *h_fgs = TTF_RenderText_Blended(font, btn->text, btn->bg_color);
     SDL_Surface *h_bgs = create_rect_surface(&bgr, &(btn->text_color), &(btn->border_color));
 
     if (SDL_BlitSurface(h_fgs, NULL, h_bgs, &fgr)) {

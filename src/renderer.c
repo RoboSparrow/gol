@@ -39,7 +39,7 @@ void renderer_init(Pattern *world) {
 
     Path path;
     path_build(FONT, path);
-    int font_size = 8;
+    int font_size = 10;
 
     int tinit = TTF_Init();
     EXIT_MINUS_F(tinit, "Failed to initialize SDL_TTF: %s.", TTF_GetError());
