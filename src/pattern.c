@@ -49,7 +49,7 @@ int pattern_load_patternlist(char *dirname, GenList *list) {
     int len = 0;
     struct dirent *e = NULL;
 
-    Path path;
+    Path path = "";
     path_build(dirname, path);
 
     dir = opendir(path);
@@ -157,15 +157,17 @@ void pattern_print_pattern(Pattern *pattern) {
  * @return -1 on error, else length of merged pattern data
  */
 int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
+
     // todo path_build?
     char *ext = str_getfileext(file);
 
-    Path path;
+    Path path = "";
     path_build(file, path);
+
     pattern->state = PATTERN_NONE;
 
     if (strcmp(ext, "rle") == 0) {
-        pattern_state state = rle_load_pattern(file, pattern, targ_state);
+        pattern_state state = rle_load_pattern(path, pattern, targ_state);
         if(state != targ_state) {
             return -1;
         }
@@ -173,14 +175,14 @@ int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
     }
 
     if (strcmp(ext, "cells") == 0) {
-        pattern_state state = cell_load_pattern(file, pattern, targ_state);
+        pattern_state state = cell_load_pattern(path, pattern, targ_state);
         if(state != targ_state) {
             return -1;
         }
         return 0;
     }
 
-    LOG_ERROR_F("pattern: No parser found for file (load)%s.", file);
+    LOG_ERROR_F("pattern: No parser found for file (load)%s.", path);
     return -1;
 }
 
@@ -194,7 +196,7 @@ int pattern_save_file(char *file, Pattern *pattern) {
     // todo path_build?
     char *ext = str_getfileext(file);
 
-    Path path;
+    Path path = "";
     path_build(file, path);
 
     if (strcmp(ext, "rle") == 0) {
@@ -207,38 +209,4 @@ int pattern_save_file(char *file, Pattern *pattern) {
 
     LOG_ERROR_F("pattern: No parser found for file (save)%s", file);
     return -1;
-}
-
-/**
- * Load pattern from file and merge into target
- * @param file file to load
- * @param pattern allocated target Pattern to lmerge into
- * @param offsetX x-offset for instering into target pattern
- * @param offsetY y-offset for instering into target pattern
- * @param origin flag for alignment of pattern relative to world offset
- * @return -1 on error or 0
- */
-int pattern_load_file_and_merge(char *file, Pattern *world, int offsetX, int offsetY, PatternOrigin origin) {
-    Pattern *pattern = pattern_allocate_pattern();
-    if (pattern == NULL) {
-        LOG_ERROR_F("Could not allocate memory for pattern file %s\n", file);
-        return -1;
-    }
-
-    int loaded = pattern_load_file(file, pattern, PATTERN_FULL);
-    if (loaded < 0) {
-        LOG_ERROR_F("Could not allocate memory for pattern file %s\n", file);
-        return -1;
-    }
-
-    switch (origin) {
-        case PATTERN_CENTER:
-            gol_merge_data(pattern, world, offsetX - (pattern->cols/2), offsetY  - (pattern->rows/2));
-        break;
-        default:
-            gol_merge_data(pattern, world, offsetX, offsetY);
-    }
-
-    pattern_free_pattern(pattern);
-    return 0;
 }

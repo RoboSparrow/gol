@@ -8,9 +8,15 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "pattern.h"
+
 #define UNIT_SIZE 10
+#define MIN_UNIT_SIZE 2
+#define MAX_UNIT_SIZE 30
+
 #define APP_NAME "RoboSparrow's game of Life"
 #define FONT "assets/NotoSans-Regular.ttf"
+#define AUTOSAVE_FILE "save/autosave.rle"
 
 typedef enum {
     SDL_SCREEN_START,
@@ -43,4 +49,11 @@ typedef struct SdlFonts {
 
 extern SdlColors Colors;
 extern SdlFonts Fonts;
+
+int game_start(GlobalState *App, Pattern *world);
+int game_restart(GlobalState *App, Pattern *world);
+
+int game_save(Pattern *world, char *file);
+int game_load(Pattern *world, char *file);
+int game_merge(Pattern *world, char *file, int offsetX, int offsetY, PatternOrigin origin);
 #endif

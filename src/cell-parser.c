@@ -242,11 +242,12 @@ pattern_state cell_load_pattern(char *file, Pattern *pattern, pattern_state targ
     pattern->state = PATTERN_META;
 
     if(targ_state == PATTERN_META) {
+        fclose(fp);
         return pattern->state;
     }
 
     // ...data
-    pattern->data = gol_allocate_data(pattern->cols, pattern->rows);
+    pattern->data = gol_allocate_data(pattern->data, pattern->cols, pattern->rows);
     if(pattern->data == NULL) {
         LOG_ERROR("error allocating memory for data.");
         fclose(fp);

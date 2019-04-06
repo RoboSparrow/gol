@@ -14,7 +14,13 @@
 #include "state.h"
 #include "renderer.h"
 
-Path FS_ROOT_DIR;
+Path FS_ROOT_DIR = "";
+Path patternfile = "";
+
+// int game_start(GlobalState *App, Pattern *world);
+// int game_restart(GlobalState *App, Pattern *world);
+// int game_save(GlobalState *App, Pattern *world, Path *file);
+// int game_load(GlobalState *App, Pattern *world, Path *file);
 
 int main(int argc, char* argv[]) {
 
@@ -23,9 +29,6 @@ int main(int argc, char* argv[]) {
         .screen = SDL_SCREEN_START,
     };
 
-    int paused = 0;
-
-    Path patternfile = "";
     SDL_Event e;
 
     // root dir, TODO this needs to be made compatible for OS and runtime modes
@@ -39,27 +42,20 @@ int main(int argc, char* argv[]) {
     init_parse_args(argc, argv, &App, world, patternfile);
 
     // init world data
-    world->data = gol_allocate_data(world->cols, world->rows);
+    world->data = gol_allocate_data(world->data, world->cols, world->rows);
     EXIT_NULL(world->data, "could not allocate memory(2) for world pattern");
-
-    // populate world
-    if(patternfile[0] == '\0') {
-        // random world
-        gol_random(world);
-    } else {
-        int merged = pattern_load_file_and_merge(patternfile, world, world->cols / 2, world->rows / 2, PATTERN_CENTER);
-        EXIT_MINUS(merged, "main: could not load pattern file\n");
-    }
-
-    // autosave world
-
-    int saved = pattern_save_file("save/autosave.rle", world);
-    EXIT_MINUS(saved, "main: could not save pattern file (autosave)\n");
 
     // init sdl & screens
     renderer_init(world);
-    screen_start_init();
-    screen_world_init();
+    screen_start_init(world);
+    screen_world_init(world);
+
+    if (patternfile[0] != '\0') {
+        // game was started from cli with -l selection
+        int merged = game_merge(world, patternfile, world->cols / 2, world->rows / 2, PATTERN_CENTER);
+        EXIT_MINUS(merged, "main: could not load pattern file");
+        game_start(&App, world);
+    }
 
     // add a small delay so that return key event from cli is not captured
     // TODO use var
@@ -88,30 +84,13 @@ int main(int argc, char* argv[]) {
                     case SDLK_ESCAPE:
                         App.screen = SDL_SCREEN_START;
                     break;
-                    case SDLK_SPACE:
-                        paused = !paused;
-                    break;
-                    case SDLK_RETURN:
-                        screen_world_clear();
-                        paused = 0;
-                        SDL_Delay(200);
-                            if(strlen(patternfile) == 0) {
-                                // random world
-                                gol_random(world);
-                            } else {
-                                int merged = pattern_load_file_and_merge(patternfile, world, world->cols / 2, world->rows / 2, PATTERN_CENTER);
-                                EXIT_MINUS(merged, "main: could not load pattern file\n");
-                            }
-                    break;
                 }
             }
         }
 
         switch (App.screen) {
             case SDL_SCREEN_WORLD:
-                if (!paused) {
-                    screen_world_render(world);
-                }
+                screen_world_render(world);
             break;
 
             case SDL_SCREEN_START:

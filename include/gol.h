@@ -10,7 +10,7 @@
 #define GOL_DEAD '.' /** defines value for a dead cell */
 #define GOL_ALIVE 'O' /** defines value for a living cell */
 
-char *gol_allocate_data(int cols, int rows);
+char *gol_allocate_data(char *data, int cols, int rows);
 void gol_free_data(char *data);
 void gol_clear_data(char *data);
 void gol_print_data(char *data, int cols, int rows);

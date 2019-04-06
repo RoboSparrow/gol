@@ -12,8 +12,8 @@
 #define LOG_ERROR(format) do { fprintf(stderr, "[error](%s:%d) " format "\n", __FILE__, __LINE__); } while(0)
 #define LOG_ERROR_F(format, ...) do { fprintf(stderr, "[error](%s:%d) " format "\n", __FILE__, __LINE__, __VA_ARGS__); } while(0)
 
-#define EXIT_NULL(val, message) do { if (val == NULL) { fprintf(stderr, "[fatal]: %s", message); exit(EXIT_FAILURE); } } while(0)
-#define EXIT_MINUS(val, message) do { if (val < 0) { fprintf(stderr, "[fatal]: %s", message); exit(EXIT_FAILURE); } } while(0)
+#define EXIT_NULL(val, message) do { if (val == NULL) { fprintf(stderr, "[fatal]: %s\n", message); exit(EXIT_FAILURE); } } while(0)
+#define EXIT_MINUS(val, message) do { if (val < 0) { fprintf(stderr, "[fatal]: %s\n", message); exit(EXIT_FAILURE); } } while(0)
 #define EXIT_NULL_F(val, format, ...) do { if (val ==NULL) { fprintf(stderr, "[error](%s:%d) " format "\n", __FILE__, __LINE__, __VA_ARGS__); exit(EXIT_FAILURE); } } while(0)
 #define EXIT_MINUS_F(val, format, ...) do { if (val < 0) { fprintf(stderr, "[error](%s:%d) " format "\n", __FILE__, __LINE__, __VA_ARGS__); exit(EXIT_FAILURE); } } while(0)
 

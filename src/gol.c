@@ -7,6 +7,7 @@
 
 #include "gol.h"
 #include "pattern.h"
+#include "utils.h"
 
 int gol_row(int index, int cols) {
     int row = 0;
@@ -131,14 +132,18 @@ void gol_random(Pattern *world) {
  * @param cols width of data matrix
  * @param rows height of data matrix
  */
-char *gol_allocate_data(int cols, int rows) {
+char *gol_allocate_data(char *data, int cols, int rows) {
     // prepare data
     size_t size = (rows * cols) + 1;
-    char *data = malloc(size * sizeof(char));
+    if (data == NULL) {
+        data = malloc(size * sizeof(char));
+    } else {
+        data = realloc(data, size * sizeof(char));
+    }
 
     if (data == NULL) {
-        perror("Could not allocate enough memory for data.\n");
-        return data;
+        LOG_ERROR("Could not allocate enough memory for data.");
+        return NULL;
     }
     // fill data with default cell value (dead)
     memset(data, GOL_DEAD, size - 1);

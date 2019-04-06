@@ -13,14 +13,69 @@ extern RendererInfo rendererInfo;
 extern SdlColors Colors;
 extern SdlFonts Fonts;
 
-SDL_Rect rect = {
+SDL_Rect unit = {
     .x = 0,
     .y = 0,
     .w = UNIT_SIZE,
     .h = UNIT_SIZE
 };
 
+// world
+SDL_Rect board = {
+    .x = 0,
+    .y = 0,
+    .w = 0,
+    .h = 0,
+};
+
 SDL_Texture *hints = NULL;
+
+int paused = 0;
+int centered = 1;
+
+void update_board(int cols, int rows) {
+
+    int mx;
+    int my;
+    SDL_GetMouseState(&mx, &my);
+
+    int xp = 0;
+    int yp = 0;
+
+    if (mx < 5) {
+        centered = 0;
+        xp = 1;
+    }
+
+    if (mx > rendererInfo.w - 5) {
+        centered = 0;
+        xp = -1;
+    }
+
+    if (my < 5) {
+        centered = 0;
+        yp = 1;
+    }
+
+    if (my > rendererInfo.h - 5) {
+        centered = 0;
+        yp = -1;
+    }
+
+    // zoom
+    board.w = cols * unit.w;
+    board.h = rows * unit.h;
+
+    // pan
+    if (centered) {
+        board.x = (rendererInfo.w - board.w)/ 2;
+        board.y = (rendererInfo.h - board.h)/ 2;
+    } else {
+        board.x += xp;
+        board.y += yp;
+    }
+
+}
 
 /**
  * render background
@@ -28,19 +83,26 @@ SDL_Texture *hints = NULL;
  * @param rows world data matrix height
  */
 void render_world_background(int cols, int rows) {
-    int ws = rendererInfo.w / cols;
-    int hs = rendererInfo.h / rows;
 
-    int i;
-    for (i = 0; i < cols; i++) {
-        SDL_RenderDrawLine(renderer, ws * i, 0, ws * i, rendererInfo.h);
-    }
-    SDL_RenderDrawLine(renderer, rendererInfo.w, 0, rendererInfo.w, rendererInfo.h);
+    int x0 = board.x;
+    int x1 = board.x + board.w;
+    int y0 = board.y;
+    int y1 = board.y + board.h;
 
-    for (i = 0; i < rows; i++) {
-        SDL_RenderDrawLine(renderer, 0, hs * i, rendererInfo.w, hs * i);
+    int xi = unit.w % cols;
+    int yi = unit.h % rows;
+
+    int i, x, y;
+    for (i = 0; i <= cols; i++) {
+        // vertical lines
+        x = (xi * i) + x0;
+        SDL_RenderDrawLine(renderer, x, y0, x, y1);
     }
-    SDL_RenderDrawLine(renderer, 0, rendererInfo.h, rendererInfo.w, rendererInfo.h);
+    for (i = 0; i <= rows; i++) {
+        // horizontal lines
+        y = (yi * i) + y0;
+        SDL_RenderDrawLine(renderer, x0, y, x1, y);
+    }
 }
 
 ////
@@ -100,10 +162,10 @@ void render_world_loop_cell(char cell, int index, int cols, int rows) {
         int row = gol_row(index, cols);
         int col = gol_col(index, row, cols);
 
-        rect.x = UNIT_SIZE * col;
-        rect.y = UNIT_SIZE * row;
+        unit.x = board.x + (unit.w * col);
+        unit.y = board.y + (unit.w * row);
 
-        SDL_RenderFillRect(renderer, &rect);
+        SDL_RenderFillRect(renderer, &unit);
     }
 }
 
@@ -116,6 +178,7 @@ void render_world_loop_cell(char cell, int index, int cols, int rows) {
  * @param world world pattern
  */
 void screen_world_init(Pattern *world) {
+    update_board(world->cols, world->rows);
     init_world_hints("press enter for restart, space for pause");
 }
 
@@ -124,6 +187,12 @@ void screen_world_init(Pattern *world) {
  * @param world world pattern
  */
 void screen_world_render(Pattern *world) {
+    if (paused) {
+        return;
+    }
+
+    update_board(world->cols, world->rows); //maybe better in events?
+
     renderer_set_color(Colors.bg);
     SDL_RenderClear(renderer);
 
@@ -145,7 +214,39 @@ void screen_world_render(Pattern *world) {
  * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world) {}
+void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world) {
+    const int step = 1;
+
+    if (e.type == SDL_MOUSEWHEEL) {
+        if(e.wheel.y == -1) {
+            if (unit.w - step > MIN_UNIT_SIZE) {
+                unit.w -= step;
+                unit.h = unit.w;
+            }
+
+        } else if (e.wheel.y == 1) {
+            if (unit.w + step < MAX_UNIT_SIZE) {
+                unit.w += step;
+                unit.h = unit.w;
+            }
+        }
+    }
+
+    if (e.type == SDL_KEYDOWN) {
+        switch (e.key.keysym.sym) {
+            case SDLK_SPACE:
+                paused = !paused;
+            break;
+            case SDLK_RETURN:
+                screen_world_clear();
+                paused = 0;
+                SDL_Delay(200);
+                int started = game_restart(App, world);
+                EXIT_MINUS(started, "Could not restart game\n"); // TODO screen message!
+            break;
+        }
+    }
+}
 
 /**
  * clear world screen

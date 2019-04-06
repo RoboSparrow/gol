@@ -160,7 +160,8 @@ void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
  * @return 0 on success >= 1 if parsing error
  */
 int rle_parse_data(FILE *fp, Pattern *pattern) {
-    //int len = pattern->rows * pattern->cols;
+
+    int len = pattern->rows * pattern->cols;
     int i = 0;
     int rowIndex = 0;
     char ch;
@@ -168,6 +169,12 @@ int rle_parse_data(FILE *fp, Pattern *pattern) {
     char row[pattern->cols + 1];
 
     while(1) {
+
+        if(i >= len) {
+            LOG_ERROR("pattern data larger than (cols * rows), skipping parsing.");
+            break;
+        }
+
         ch = fgetc(fp);
 
         if(feof(fp)) {
@@ -180,6 +187,7 @@ int rle_parse_data(FILE *fp, Pattern *pattern) {
             row[0] = '\0'; // clear
             i = 0;
             rowIndex++;
+
             // end of data
             if(ch == RLE_EOPATT) {
                 break;
@@ -190,7 +198,6 @@ int rle_parse_data(FILE *fp, Pattern *pattern) {
         row[i] = ch;
         i++;
     }
-
     return 0;
 }
 
@@ -325,7 +332,7 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
     }
 
     // ...data
-    pattern->data = gol_allocate_data(pattern->cols, pattern->rows);
+    pattern->data = gol_allocate_data(pattern->data, pattern->cols, pattern->rows);
     if(pattern->data == NULL) {
         LOG_ERROR("error allocating memory for data.");
         fclose(fp);

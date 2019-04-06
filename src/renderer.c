@@ -37,7 +37,7 @@ void renderer_init(Pattern *world) {
 
     // SDL ttf
 
-    Path path;
+    Path path = "";
     path_build(FONT, path);
     int font_size = 10;
 
@@ -45,7 +45,7 @@ void renderer_init(Pattern *world) {
     EXIT_MINUS_F(tinit, "Failed to initialize SDL_TTF: %s.", TTF_GetError());
 
     Fonts.body = TTF_OpenFont(path, font_size);
-    EXIT_NULL_F(Fonts.body, "Failed to load SDL_TTF font: %s.", TTF_GetError());
+    EXIT_NULL_F(Fonts.body, "Failed to load SDL_TTF font %s: %s.", path, TTF_GetError());
 
     SDL_RenderSetLogicalSize(renderer, sizeX, sizeY);
 }

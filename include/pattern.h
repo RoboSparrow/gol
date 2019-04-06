@@ -42,6 +42,4 @@ void pattern_print_pattern(Pattern *pattern);
 
 int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state);
 int pattern_save_file(char *file, Pattern *pattern);
-
-int pattern_load_file_and_merge(char *file, Pattern *world, int offsetX, int offsetY, PatternOrigin origin);
 #endif

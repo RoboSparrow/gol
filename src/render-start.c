@@ -42,7 +42,7 @@ void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
             gol_clear_data(world->data);
             gol_random(world);
             SDL_Delay(50);
-            App->screen = SDL_SCREEN_WORLD;
+            game_start(App, world);
             return;
         default:
             return;
@@ -152,17 +152,15 @@ void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
         // actions
         switch(widget->state) {
             case WSTATE_RELEASED:
-
                 printf("action %s: %s..\n", widget->text, pattern->file);
-                gol_clear_data(world->data);
-                int merged = pattern_load_file_and_merge(pattern->file, world, world->cols / 2, world->rows / 2, PATTERN_CENTER);
-                //// TODO screen message!
-                EXIT_MINUS(merged, "main: could not load pattern file\n");
-                App->screen = SDL_SCREEN_WORLD;
+                int merged = game_merge(world, pattern->file, world->cols / 2, world->rows / 2, PATTERN_CENTER);
+                EXIT_MINUS(merged, "main: could not load pattern file"); // TODO screen message!
+                int started = game_start(App, world);
+                EXIT_MINUS(started, "Could not restart game"); // TODO screen message!
+            break;
 
-                break;
             default:
-                break;
+            break;
         }
 
     }
@@ -176,7 +174,7 @@ void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
  * initialize this screen
  * @param world world pattern
  */
-void screen_start_init() {
+void screen_start_init(Pattern *world) {
 
     // control buttons
     btn_rand->text_color = Colors.bg;

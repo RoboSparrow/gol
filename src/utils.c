@@ -12,6 +12,15 @@
 #include "utils.h"
 
 /**
+ * checks if a string starts with a given prefix
+ */
+int str_startswith(char *search, char *str ) {
+    size_t lsearch = strlen(search);
+    size_t lstr = strlen(str);
+    return (lstr < lsearch) ? 0 : strncmp(search, str, lsearch) == 0;
+}
+
+/**
  * strips whistespaces from a string
  */
 void str_nospaces(char* source) {
@@ -73,9 +82,15 @@ char *str_getfileext(char *filename) {
  * @param path Path buffer to write into
  */
 int path_build(char *segment, Path path) {
+
     extern Path FS_ROOT_DIR;
 
+    if(str_startswith(FS_ROOT_DIR, segment)) {
+        strcpy(path, segment);
+        return strlen(path);
+    }
     strcpy(path, FS_ROOT_DIR);
+
     if (segment[0] == '\0') {
         return strlen(path);
     }
