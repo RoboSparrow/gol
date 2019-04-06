@@ -14,7 +14,7 @@
 /**
  * checks if a string starts with a given prefix
  */
-int str_startswith(char *search, char *str ) {
+int str_startswith(char *search, char *str) {
     size_t lsearch = strlen(search);
     size_t lstr = strlen(str);
     return (lstr < lsearch) ? 0 : strncmp(search, str, lsearch) == 0;

@@ -9,19 +9,7 @@
 #include "pattern.h"
 #include "utils.h"
 
-int gol_row(int index, int cols) {
-    int row = 0;
-    row = (int) index / cols;
-    return row;
-}
-
-int gol_col(int index, int row, int cols) {
-    int col = 0;
-    col = index - (row * cols);
-    return col;
-}
-
-void col_get_cluster(int ns[], int index, int cols, int rows) {
+static void col_get_cluster(int ns[], int index, int cols, int rows) {
 
     int row = gol_row(index, cols);
     int col = gol_col(index, row, cols);
@@ -64,7 +52,7 @@ void col_get_cluster(int ns[], int index, int cols, int rows) {
  *  Any live cell with more than three live neighbors dies, as if by overpopulation.
  *  Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
  */
-int gol_update_cell(char *data, int index, int cols, int rows) {
+static int gol_update_cell(char *data, int index, int cols, int rows) {
 
     char cell = data[index];
     int health = 0;
@@ -88,6 +76,24 @@ int gol_update_cell(char *data, int index, int cols, int rows) {
 
     return cell;
 }
+
+/**
+ * get row for a given index
+ */
+int gol_row(int index, int cols) {
+    int row = 0;
+    row = (int) index / cols;
+    return row;
+}
+/**
+ * get col for a given index
+ */
+int gol_col(int index, int row, int cols) {
+    int col = 0;
+    col = index - (row * cols);
+    return col;
+}
+
 
 /**
  *  A day in world history. Updates world data matrix according to gol rules.

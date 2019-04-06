@@ -11,7 +11,7 @@
 /**
  * helper input for init_parse_args -l
  */
-void cli_print_patternlist(GenList *list) {
+static void cli_print_patternlist(GenList *list) {
     for(int i = 0; i < list->length; i++) {
         Pattern *pattern = (Pattern*) genlist_get(list, i);
         printf("%d) %s (%dx%d)\n", i + 1, pattern->title, pattern->cols, pattern->rows);
@@ -22,7 +22,7 @@ void cli_print_patternlist(GenList *list) {
 /**
  * helper input for init_parse_args -l
  */
-int select_pattern(int len) {
+static int select_pattern(int len) {
     printf("--------------\n");
     int selected = 0;
     int cl;

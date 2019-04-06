@@ -19,7 +19,7 @@
 /**
  * counts the occurence of cell chars in a line
  */
-int cell_data_line_width(char *line) {
+static int cell_data_line_width(char *line) {
     size_t len = strlen(line);
     int count = 0;
     for(int i = 0; i < len; i++) {
@@ -38,7 +38,7 @@ int cell_data_line_width(char *line) {
  * @param rowOffset row offset in context of data
  * @param pattern Pattern struct
  */
-void cell_parse_data_line(char *line, int rowOffset, Pattern *pattern) {
+static void cell_parse_data_line(char *line, int rowOffset, Pattern *pattern) {
         int cols = pattern->cols;
         char *data = pattern->data;
 
@@ -86,7 +86,7 @@ void cell_parse_data_line(char *line, int rowOffset, Pattern *pattern) {
  * @param pattern Pattern struct with alredy ready allocated data matrix filled with GOL_CELL_DEAD values (1D char array)
  * @return 0 on success >= 1 if parsing error
  */
-int cell_parse_data(char *currentLine, FILE *fp, Pattern *pattern){
+static int cell_parse_data(char *currentLine, FILE *fp, Pattern *pattern){
     int rows = pattern->rows;
 
     cell_parse_data_line(currentLine, 0, pattern);
@@ -107,7 +107,7 @@ int cell_parse_data(char *currentLine, FILE *fp, Pattern *pattern){
     return 0;
 }
 
-int cell_load_meta(FILE *fp, Pattern *pattern){
+static int cell_load_meta(FILE *fp, Pattern *pattern){
     char title[LINE_BOUNDS] = { '\0' };
     char description[LINE_BOUNDS] = { '\0' };
 
@@ -190,7 +190,7 @@ int cell_load_meta(FILE *fp, Pattern *pattern){
  * @param data ready allocated data matrix filled with GOL_CELL_DEAD values (1D char array)
  * @return 0 on success >= 1 if parsing error
  */
-int cell_load_data(FILE *fp, Pattern *pattern) {
+static int cell_load_data(FILE *fp, Pattern *pattern) {
     rewind (fp); // TODO use fseek, this should not be neccessary
 
     int i = 0;
@@ -221,6 +221,9 @@ int cell_load_data(FILE *fp, Pattern *pattern) {
     return 0;
 }
 
+////
+// api
+////
 
 pattern_state cell_load_pattern(char *file, Pattern *pattern, pattern_state targ_state) {
     // always

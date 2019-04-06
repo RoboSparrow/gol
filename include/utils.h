@@ -19,6 +19,7 @@
 
 typedef char Path[PATH_MAX];
 
+int str_startswith(char *search, char *str);
 void str_nospaces(char* source);
 char *str_trim(char *str);
 void str_tolower(char *str);

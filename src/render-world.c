@@ -33,7 +33,7 @@ SDL_Texture *hints = NULL;
 int paused = 0;
 int centered = 1;
 
-void update_board(int cols, int rows) {
+static void update_board(int cols, int rows) {
 
     int mx;
     int my;
@@ -42,22 +42,22 @@ void update_board(int cols, int rows) {
     int xp = 0;
     int yp = 0;
 
-    if (mx < 5) {
+    if (mx < 5 && board.x < 100) {
         centered = 0;
         xp = 1;
     }
 
-    if (mx > rendererInfo.w - 5) {
+    if (mx > rendererInfo.w - 5 && board.x > -50) {
         centered = 0;
         xp = -1;
     }
 
-    if (my < 5) {
+    if (my < 5 && board.y < 100) {
         centered = 0;
         yp = 1;
     }
 
-    if (my > rendererInfo.h - 5) {
+    if (my > rendererInfo.h - 5 && board.y > -50) {
         centered = 0;
         yp = -1;
     }
@@ -71,8 +71,8 @@ void update_board(int cols, int rows) {
         board.x = (rendererInfo.w - board.w)/ 2;
         board.y = (rendererInfo.h - board.h)/ 2;
     } else {
-        board.x += xp;
-        board.y += yp;
+        board.x += (xp * unit.w);
+        board.y += (yp * unit.h);
     }
 
 }
@@ -82,7 +82,7 @@ void update_board(int cols, int rows) {
  * @param cols world data matrix width
  * @param rows world data matrix height
  */
-void render_world_background(int cols, int rows) {
+static void render_world_background(int cols, int rows) {
 
     int x0 = board.x;
     int x1 = board.x + board.w;
@@ -112,7 +112,7 @@ void render_world_background(int cols, int rows) {
 /**
  * initializes hints
  */
-void init_world_hints(char text[]) {
+static void init_world_hints(char text[]) {
     SDL_Surface *surface;
 
     if (!(surface = TTF_RenderUTF8_Solid(Fonts.body, text, Colors.text))) {
@@ -127,7 +127,7 @@ void init_world_hints(char text[]) {
 /**
  * render text hints
  */
-void render_world_hints() {
+static void render_world_hints() {
     if (hints == NULL) {
         return;
     }
@@ -155,7 +155,7 @@ void render_world_hints() {
  * @param cols world data matrix width
  * @param rows world data matrix height
  */
-void render_world_loop_cell(char cell, int index, int cols, int rows) {
+static void render_world_loop_cell(char cell, int index, int cols, int rows) {
     // SDL_Log("cell index %d, status %d", index, cell);
     if (cell == GOL_ALIVE) {
 
@@ -218,6 +218,7 @@ void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world) {
     const int step = 1;
 
     if (e.type == SDL_MOUSEWHEEL) {
+        // todo move calculations to update functions
         if(e.wheel.y == -1) {
             if (unit.w - step > MIN_UNIT_SIZE) {
                 unit.w -= step;

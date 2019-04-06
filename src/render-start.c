@@ -33,7 +33,7 @@ GenList patternWidgets;
  * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
+static void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
     widgets_btn_event(btn_rand, e);
 
     switch(btn_rand->state) {
@@ -55,7 +55,7 @@ void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
  * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void events_btn_quit(SDL_Event e, GlobalState *App, Pattern *world) {
+static void events_btn_quit(SDL_Event e, GlobalState *App, Pattern *world) {
     widgets_btn_event(btn_quit, e);
 
     switch(btn_quit->state) {
@@ -80,7 +80,7 @@ void events_btn_quit(SDL_Event e, GlobalState *App, Pattern *world) {
  * @param xMargin x margin for individiual widget
  * @param yMargin y margin for individiual widget
  */
-void init_pattern_widgets(int startX, int startY, int xMargin, int yMargin) {
+static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargin) {
 
     int x = startX;
     int y = startY;
@@ -113,7 +113,7 @@ void init_pattern_widgets(int startX, int startY, int xMargin, int yMargin) {
 /**
  * renders pattern widgets
  */
-void render_pattern_widgets() {
+static void render_pattern_widgets() {
 
     if(!patternWidgets.length) {
         return;
@@ -133,7 +133,7 @@ void render_pattern_widgets() {
  * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
+static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
 
     if(!patternWidgets.length) {
         return;

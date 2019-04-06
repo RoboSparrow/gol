@@ -25,7 +25,7 @@
  * @param pattern Pattern struct
  * @return 0 on success >= 1 if parsing error
  */
-int rle_parse_comment(char *line, Pattern *pattern) {
+static int rle_parse_comment(char *line, Pattern *pattern) {
 
     char flag = toupper(line[1]);
 
@@ -64,7 +64,7 @@ int rle_parse_comment(char *line, Pattern *pattern) {
  * @param pattern Pattern struct
  * @return 0 on success >= 1 if parsing error
  */
-int rle_parse_header(char *line, Pattern *pattern) {
+static int rle_parse_header(char *line, Pattern *pattern) {
     str_nospaces(str_trim(line));
 
     // split by comma
@@ -106,7 +106,7 @@ int rle_parse_header(char *line, Pattern *pattern) {
  * @param rowOffset row offset in context of data
  * @param pattern Pattern struct
  */
-void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
+static void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
 
     int index = rowOffset * pattern->cols;
     int len = strlen(row);
@@ -159,7 +159,7 @@ void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
  * @param pattern Pattern struct with alredy ready allocated data matrix filled with GOL_CELL_DEAD values (1D char array)
  * @return 0 on success >= 1 if parsing error
  */
-int rle_parse_data(FILE *fp, Pattern *pattern) {
+static int rle_parse_data(FILE *fp, Pattern *pattern) {
 
     int len = pattern->rows * pattern->cols;
     int i = 0;
@@ -214,7 +214,7 @@ int rle_parse_data(FILE *fp, Pattern *pattern) {
  * @param pattern Pattern struct
  * @return 0 on success >= 1 if parsing error
  */
-int rle_load_meta(FILE *fp, Pattern *pattern) {
+static int rle_load_meta(FILE *fp, Pattern *pattern) {
     // make sure we are on top of file
     rewind(fp);
 
@@ -266,7 +266,7 @@ int rle_load_meta(FILE *fp, Pattern *pattern) {
  * @param data ready allocated data matrix filled with GOL_CELL_DEAD values (1D char array)
  * @return 0 on success >= 1 if parsing error
  */
-int rle_load_data(FILE *fp, Pattern *pattern) {
+static int rle_load_data(FILE *fp, Pattern *pattern) {
     rewind (fp); // TODO use fseek, this should not be neccessary
 
     int i = 0;
@@ -307,6 +307,9 @@ int rle_load_data(FILE *fp, Pattern *pattern) {
     return 0;
 }
 
+////
+// api
+////
 
 pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_state) {
     // always

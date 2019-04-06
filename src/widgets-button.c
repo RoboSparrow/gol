@@ -6,7 +6,7 @@
 
 extern SDL_Window* window;
 
-SDL_Surface *create_rect_surface(SDL_Rect *rect, SDL_Color *bgcolor, SDL_Color *bordercolor) {
+static SDL_Surface *create_rect_surface(SDL_Rect *rect, SDL_Color *bgcolor, SDL_Color *bordercolor) {
     SDL_Surface *s;
 
     s = SDL_CreateRGBSurfaceWithFormat(0, rect->w, rect->h, 32, SDL_GetWindowPixelFormat(window));
@@ -41,6 +41,8 @@ SDL_Surface *create_rect_surface(SDL_Rect *rect, SDL_Color *bgcolor, SDL_Color *
 void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, int y) {
     int margin = 5;
 
+    // default texture
+
     SDL_Surface *fgs = TTF_RenderText_Blended(font, btn->text, btn->text_color);
     if (fgs == NULL) {
         SDL_Log("TTF_RenderText_Solid failed: %s", SDL_GetError());
@@ -62,6 +64,8 @@ void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, 
         return;
     }
 
+    // hover texture
+
     SDL_Surface *h_fgs = TTF_RenderText_Blended(font, btn->text, btn->bg_color);
     SDL_Surface *h_bgs = create_rect_surface(&bgr, &(btn->text_color), &(btn->border_color));
 
@@ -76,6 +80,8 @@ void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, 
         return;
     }
 
+    // assign geometry
+
     int w = 0;
     int h = 0;
     SDL_QueryTexture(default_texture , NULL, NULL, &w, &h);
@@ -85,6 +91,8 @@ void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, 
     btn->default_texture = default_texture;
     btn->hover_texture = hover_texture;
 
+    // cleanup
+
     SDL_FreeSurface(fgs);
     SDL_FreeSurface(bgs);
     SDL_FreeSurface(h_fgs);
@@ -93,12 +101,15 @@ void widgets_button_init(Widget *btn, SDL_Renderer *ren, TTF_Font *font, int x, 
 
 void widgets_button_render(Widget *btn, SDL_Renderer *ren) {
     int ok = 0;
+
     switch(btn->state) {
+
         case WSTATE_DEFAULT:
             if(btn->default_texture != NULL) {
                 ok = SDL_RenderCopy(ren, btn->default_texture, NULL, &(btn->rect));
             }
             break;
+
         case WSTATE_HOVER:
         case WSTATE_ACTIVE:
         case WSTATE_RELEASED:
@@ -106,10 +117,12 @@ void widgets_button_render(Widget *btn, SDL_Renderer *ren) {
                 ok = SDL_RenderCopy(ren, btn->hover_texture, NULL, &(btn->rect));
             }
             break;
+
         case WSTATE_NONE:
         default:
             break;
     }
+
     if (ok < 0) {
         SDL_Log("SDL_RenderCopy() failed: %s", SDL_GetError());
     }

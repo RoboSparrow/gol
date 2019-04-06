@@ -17,11 +17,6 @@
 Path FS_ROOT_DIR = "";
 Path patternfile = "";
 
-// int game_start(GlobalState *App, Pattern *world);
-// int game_restart(GlobalState *App, Pattern *world);
-// int game_save(GlobalState *App, Pattern *world, Path *file);
-// int game_load(GlobalState *App, Pattern *world, Path *file);
-
 int main(int argc, char* argv[]) {
 
     GlobalState App = {
@@ -58,7 +53,6 @@ int main(int argc, char* argv[]) {
     }
 
     // add a small delay so that return key event from cli is not captured
-    // TODO use var
     SDL_Delay(100);
 
     while (App.state > APP_STATE_QUIT) {

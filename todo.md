@@ -6,11 +6,15 @@ x app state struct
 x replace pattern list with generic array (c++ vector like) solution
 - genlist functions, return int status insead void func to check success => pattern_load_patternlist()
 - pattern and widget allocate/free pointers (char*, SDl structs)
+- gol_merge_data: guard against src memory > targ
 
 sdl:
 - view pattern static (for preview and future editor)
-- calculate screen canvas dims and set dynamic size
-- zoom (center world on start)
+- calculate screen frame dims and set dynamic size
+x zoom
+x pan
+- center world on screen
+- only render units in frame
 - widgets: error handling
 - sdl message overlay (errors, notifications etc)
 
