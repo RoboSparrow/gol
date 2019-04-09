@@ -5,7 +5,7 @@
 
 #include "state.h"
 #include "renderer.h"
-#include "widgets.h"
+#include "widget.h"
 #include "pattern.h"
 #include "gol.h"
 
@@ -14,11 +14,8 @@ extern SdlColors Colors;
 extern SdlFonts Fonts;
 extern RendererInfo rendererInfo;
 
-Widget _btn_rand = { WSTATE_DEFAULT, "Random game" };
-Widget *btn_rand =  &_btn_rand;
-
-Widget _btn_quit = { WSTATE_DEFAULT, "Quit Game" };
-Widget *btn_quit =  &_btn_quit;
+Widget *btn_rand = NULL;
+Widget *btn_quit = NULL;
 
 GenList patterns;
 GenList patternWidgets;
@@ -34,7 +31,7 @@ GenList patternWidgets;
  * @param world world pattern
  */
 static void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
-    widgets_btn_event(btn_rand, e);
+    widget_event(btn_rand, e);
 
     switch(btn_rand->state) {
         case WSTATE_RELEASED:
@@ -56,7 +53,7 @@ static void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
  * @param world world pattern
  */
 static void events_btn_quit(SDL_Event e, GlobalState *App, Pattern *world) {
-    widgets_btn_event(btn_quit, e);
+    widget_event(btn_quit, e);
 
     switch(btn_quit->state) {
         case WSTATE_RELEASED:
@@ -81,7 +78,6 @@ static void events_btn_quit(SDL_Event e, GlobalState *App, Pattern *world) {
  * @param yMargin y margin for individiual widget
  */
 static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargin) {
-
     int x = startX;
     int y = startY;
 
@@ -90,23 +86,16 @@ static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargi
     }
     Widget *widget;
     Pattern *pattern;
+    int height;
     for (int i = 0; i < patterns.length; i++) {
         pattern = (Pattern *) genlist_get(&patterns, i);
 
-        widget = malloc(sizeof(Widget));
-
-        widget->state = WSTATE_DEFAULT;
-        widget->text = malloc(strlen(pattern->title));
-        // todo check alloc
-        strcpy(widget->text, pattern->title);
-        widget->text_color = Colors.text;
-        widget->bg_color = Colors.bg;
-        widget->border_color = Colors.borders;
-
-        widgets_button_init(widget, renderer, Fonts.body, x + xMargin, y);
+        widget = widget_new(WTYPE_BUTTON, pattern->title, &(Colors.text), &(Colors.bg), &(Colors.contrast));
+        widget_build(widget, renderer, Fonts.body, x + xMargin, y);
         genlist_push(&patternWidgets, widget);
 
-        y += (yMargin + widget->rect.h);
+        height = widget->rect->h + yMargin;
+        y += height;
     }
 }
 
@@ -114,7 +103,6 @@ static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargi
  * renders pattern widgets
  */
 static void render_pattern_widgets() {
-
     if(!patternWidgets.length) {
         return;
     }
@@ -123,7 +111,7 @@ static void render_pattern_widgets() {
     for(int i = 0; i < patternWidgets.length; i++) {
         widget = (Widget *) genlist_get(&patternWidgets, i);
         // widgets_print_widgets(widget);
-        widgets_button_render(widget, renderer);
+        widget_render(widget, renderer, NULL);
     }
 }
 
@@ -134,7 +122,6 @@ static void render_pattern_widgets() {
  * @param world world pattern
  */
 static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
-
     if(!patternWidgets.length) {
         return;
     }
@@ -147,7 +134,7 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
         pattern = (Pattern *) genlist_get(&patterns, i);
 
         // default events
-        widgets_btn_event(widget, e);
+        widget_event(widget, e);
 
         // actions
         switch(widget->state) {
@@ -177,15 +164,11 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
 void screen_start_init(Pattern *world) {
 
     // control buttons
-    btn_rand->text_color = Colors.bg;
-    btn_rand->bg_color = Colors.text;
-    btn_rand->border_color = Colors.borders;
-    widgets_button_init(btn_rand, renderer, Fonts.body, 5, 5);
+    btn_rand = widget_new(WTYPE_BUTTON, "Random game", &(Colors.bg), &(Colors.text), &(Colors.contrast));
+    widget_build(btn_rand, renderer, Fonts.body, 5, 5);
 
-    btn_quit->text_color = Colors.bg;
-    btn_quit->bg_color = Colors.text;
-    btn_quit->border_color = Colors.borders;
-    widgets_button_init(btn_quit, renderer, Fonts.body, 5 + btn_rand->rect.x + btn_rand->rect.w , 5);
+    btn_quit = widget_new(WTYPE_BUTTON, "Quit Game", &(Colors.bg), &(Colors.text), &(Colors.contrast));
+    widget_build(btn_quit, renderer, Fonts.body, btn_rand->rect->w + 25, 5);
 
     // pattern widget list
     genlist_init(&patternWidgets);
@@ -209,8 +192,8 @@ void screen_start_render() {
     renderer_set_color(Colors.bg);
     SDL_RenderClear(renderer);
 
-    widgets_button_render(btn_rand, renderer);
-    widgets_button_render(btn_quit, renderer);
+    widget_render(btn_rand, renderer, NULL);
+    widget_render(btn_quit, renderer, NULL);
 
     render_pattern_widgets();
     SDL_RenderPresent(renderer);
@@ -232,18 +215,14 @@ void screen_start_events(SDL_Event e, GlobalState *App, Pattern *world) {
  * destroys this screen and components
  */
 void screen_start_destroy() {
-    widgets_button_destroy(btn_quit);
-    widgets_button_destroy(btn_rand);
+    widget_destroy(btn_quit);
+    widget_destroy(btn_rand);
     //todo widgets free
     for (int i = 0; i < patternWidgets.length; i++) {
         Widget *widget = (Widget *) genlist_get(&patternWidgets, i);
-        if(widget->text != NULL) {
-            free(widget->text);
-        }
-        widgets_button_destroy(widget);
+        widget_destroy(widget);
     }
     genlist_free(&patternWidgets);
-
     pattern_free_patternlist(&patterns);
     genlist_free(&patterns);
 }
