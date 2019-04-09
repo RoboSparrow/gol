@@ -4,16 +4,17 @@
 - improve utils functons, add tests
 x app state struct
 x replace pattern list with generic array (c++ vector like) solution
-- genlist functions, return int status insead void func to check success => pattern_load_patternlist()
-- pattern and widget allocate/free pointers (char*, SDl structs)
+- genlist functions, return int status instead void func to check success => pattern_load_patternlist()
+x pattern and widget allocate/free pointers (char*, SDl structs)
 - gol_merge_data: guard against src memory > targ
 
 sdl:
+- widget blending color
 - view pattern static (for preview and future editor)
 - calculate screen frame dims and set dynamic size
 x zoom
 x pan
-- center world on screen
+x center world on screen
 - only render units in frame
 - widgets: error handling
 - sdl message overlay (errors, notifications etc)

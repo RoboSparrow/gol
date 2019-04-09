@@ -41,23 +41,25 @@ static void update_board(int cols, int rows) {
 
     int xp = 0;
     int yp = 0;
+    int mpadding = 5; // padding for areas around edges who trigger panning
+    int bmargin = 20; // margin for board panning
 
-    if (mx < 5 && board.x < 100) {
+    if (mx < mpadding && board.x < bmargin) {
         centered = 0;
         xp = 1;
     }
 
-    if (mx > rendererInfo.w - 5 && board.x > -50) {
+    if (mx > rendererInfo.w - mpadding && board.x > -bmargin) {
         centered = 0;
         xp = -1;
     }
 
-    if (my < 5 && board.y < 100) {
+    if (my < mpadding && board.y < bmargin) {
         centered = 0;
         yp = 1;
     }
 
-    if (my > rendererInfo.h - 5 && board.y > -50) {
+    if (my > rendererInfo.h - mpadding && board.y > -bmargin) {
         centered = 0;
         yp = -1;
     }

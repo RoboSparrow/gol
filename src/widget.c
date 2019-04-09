@@ -48,7 +48,7 @@ static SDL_Surface *create_background_surface(SDL_Rect *bgrect, SDL_Color *bgcol
         Uint32 ubgcol = SDL_MapRGB(temp->format, bgcol->r,bgcol->b, bgcol->g);
         SDL_FillRect(temp, NULL, ubgcol);
     }
-
+    // SDL_BLENDMODE_BLEND is actually the default blend mode
     SDL_SetSurfaceBlendMode(temp, SDL_BLENDMODE_BLEND);
     return temp;
 }
