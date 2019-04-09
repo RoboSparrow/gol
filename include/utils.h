@@ -17,6 +17,11 @@
 #define EXIT_NULL_F(val, format, ...) do { if (val ==NULL) { fprintf(stderr, "[error](%s:%d) " format "\n", __FILE__, __LINE__, __VA_ARGS__); exit(EXIT_FAILURE); } } while(0)
 #define EXIT_MINUS_F(val, format, ...) do { if (val < 0) { fprintf(stderr, "[error](%s:%d) " format "\n", __FILE__, __LINE__, __VA_ARGS__); exit(EXIT_FAILURE); } } while(0)
 
+#define RETURN_VOID_IF(expr) if (expr) { return; }
+#define RETURN_VAL_IF(expr, val) if (expr) { return val; }
+#define RETURN_VOID_IF_ERR(expr, msg) if (expr) { LOG_ERROR(msg); return; }
+#define RETURN_VAL_IF_ERR(expr, val, msg)  if (expr) { LOG_ERROR(msg); return val; }
+
 typedef char Path[PATH_MAX];
 
 int str_startswith(char *search, char *str);
