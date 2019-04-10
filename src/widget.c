@@ -1,6 +1,9 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "widget.h"
+#include "utils.h"
+#include "state.h"
 
 int widget_is_in_rect(int x, int y, SDL_Rect *rect);
 

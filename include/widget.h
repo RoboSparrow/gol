@@ -7,8 +7,6 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-#include "state.h" //todo remove dependency
-#include "pattern.h" //todo remove dependency
 
 typedef enum {
     WSTATE_NONE,                    // hidden
