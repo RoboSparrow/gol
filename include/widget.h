@@ -39,7 +39,8 @@ typedef struct Widget {
 
 
 Widget *widget_new(WidgetType type, char *text, SDL_Color *fgcol, SDL_Color *bgcol, SDL_Color *hbgcol);
-int widget_build(Widget *widget, SDL_Renderer *ren, TTF_Font *font, int x, int y);
+int widget_build(Widget *widget, SDL_Renderer *ren, TTF_Font *font, int xmargin, int ymargin, int wrap);
+void widget_setPostion(Widget *widget, int x, int y);
 void widget_render(Widget *widget, SDL_Renderer *ren, SDL_Rect *clip);
 void widget_event(Widget *widget, SDL_Event e);
 void widget_destroy(Widget *widget);

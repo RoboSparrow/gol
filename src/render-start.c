@@ -91,7 +91,8 @@ static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargi
         pattern = (Pattern *) genlist_get(&patterns, i);
 
         widget = widget_new(WTYPE_BUTTON, pattern->title, &(Colors.text), &(Colors.bg), &(Colors.contrast));
-        widget_build(widget, renderer, Fonts.body, x + xMargin, y);
+        widget_build(widget, renderer, Fonts.body, 5, 5, 0);
+        widget_setPostion(widget, x, y);
         genlist_push(&patternWidgets, widget);
 
         height = widget->rect->h + yMargin;
@@ -165,10 +166,12 @@ void screen_start_init(Pattern *world) {
 
     // control buttons
     btn_rand = widget_new(WTYPE_BUTTON, "Random game", &(Colors.bg), &(Colors.text), &(Colors.contrast));
-    widget_build(btn_rand, renderer, Fonts.body, 5, 5);
+    widget_build(btn_rand, renderer, Fonts.body, 5, 5, 0);
+    widget_setPostion(btn_rand, 5, 5);
 
     btn_quit = widget_new(WTYPE_BUTTON, "Quit Game", &(Colors.bg), &(Colors.text), &(Colors.contrast));
-    widget_build(btn_quit, renderer, Fonts.body, btn_rand->rect->w + 25, 5);
+    widget_build(btn_quit, renderer, Fonts.body, 5, 5, 0);
+    widget_setPostion(btn_quit, btn_rand->rect->x + btn_rand->rect->w + 2, 5);
 
     // pattern widget list
     genlist_init(&patternWidgets);

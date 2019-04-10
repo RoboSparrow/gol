@@ -32,25 +32,50 @@ static void widget_render_decoration(Widget *widget, SDL_Renderer *ren, SDL_Rect
 }
 
 /**
- * create a background surface (to be blitted with foreground)
- * @param bgrect widget dimension,  only "w" and "h" properties are considered
- * @param bgcol widget background color. Pass NULL if bg is transparent
- * @return surface or null on failure
+ * create a widget texture by blending sufaces for forground (text) and background
  */
-static SDL_Surface *create_background_surface(SDL_Rect *bgrect, SDL_Color *bgcol) {
-    SDL_Surface* temp;
-    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    temp = SDL_CreateRGBSurface(0, bgrect->w, bgrect->h, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-    #else
-    temp = SDL_CreateRGBSurface(0, bgrect->w, bgrect->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-    #endif
-    if(bgcol != NULL) {
-        Uint32 ubgcol = SDL_MapRGB(temp->format, bgcol->r,bgcol->b, bgcol->g);
-        SDL_FillRect(temp, NULL, ubgcol);
+// todo free surfaces on error
+static SDL_Texture *create_widget_texture(SDL_Renderer *renderer, TTF_Font *font, char *text, WidgetType type, SDL_Color *fgcol, SDL_Color *bgcol, int xmargin, int ymargin, int wrap) {
+    SDL_Surface *bgsurf;
+    SDL_Surface *fgsurf;
+    SDL_Texture* fgtexture;
+
+    if(wrap > 0) {
+        fgsurf = TTF_RenderText_Blended_Wrapped(font, text, *(fgcol), wrap);
+    } else {
+        fgsurf = TTF_RenderText_Blended(font, text, *(fgcol));
     }
-    // SDL_BLENDMODE_BLEND is actually the default blend mode
-    SDL_SetSurfaceBlendMode(temp, SDL_BLENDMODE_BLEND);
-    return temp;
+    RETURN_VAL_IF_ERR(fgsurf == NULL, NULL, "Failed to render widget text!");
+
+    int w = fgsurf->w + (2 * xmargin);
+    int h = fgsurf->h + (2 * ymargin);
+
+    if (bgcol != NULL) {
+        bgsurf = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
+    } else {
+        #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        bgsurf = SDL_CreateRGBSurface(0, w, h, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+        #else
+        bgsurf = SDL_CreateRGBSurface(0, w, h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+        #endif
+    }
+    RETURN_VAL_IF_ERR(bgsurf == NULL, NULL, "Failed to create surface for widget background!");
+
+    if(bgcol) {
+        SDL_FillRect(bgsurf, NULL, SDL_MapRGB(bgsurf->format, bgcol->r, bgcol->g, bgcol->b));
+    }
+
+    SDL_Rect fgclip = { xmargin, ymargin, bgsurf->w, bgsurf->h };
+    int blitted = SDL_BlitSurface(fgsurf, NULL, bgsurf, &fgclip);
+    RETURN_VAL_IF_ERR(blitted < 0, NULL, "Failed to blit surfaces for widget texture!");
+
+    fgtexture = SDL_CreateTextureFromSurface(renderer, bgsurf);
+    RETURN_VAL_IF_ERR(fgtexture == NULL, NULL, "Failed to create widget texture! from surface!");
+
+    SDL_FreeSurface(bgsurf);
+    SDL_FreeSurface(fgsurf);
+
+    return fgtexture;
 }
 
 /**
@@ -191,62 +216,36 @@ void widget_destroy( Widget *widget ) {
  * Do this before the entering the render loop
  * @return -1 on failure, otherwise 0
  */
-int widget_build(Widget *widget, SDL_Renderer *ren, TTF_Font *font, int x, int y) {
+int widget_build(Widget *widget, SDL_Renderer *ren, TTF_Font *font, int xmargin, int ymargin, int wrap) {
     RETURN_VAL_IF(widget == NULL, -1);
 
-    int margin = 5;
-
-    //flags
-    int blitted;
-    SDL_Surface *fgsurf = NULL;
-    SDL_Surface *bgsurf = NULL;
-    SDL_Surface *hbgsurf = NULL;
-
-    // text surface
-    switch(widget->type) {
-        case WTYPE_TEXTBOX:
-            fgsurf = TTF_RenderText_Blended_Wrapped(font, widget->text, *(widget->fgcol), 200);
-        break;
-        default:
-            fgsurf = TTF_RenderText_Blended(font, widget->text, *(widget->fgcol));
-    }
-    RETURN_VAL_IF_ERR(fgsurf == NULL, -1, "Failed to render text for widget!");
-
-    // box geometry
-    SDL_Rect textclip = { margin , margin, fgsurf->w, fgsurf->h };
-    SDL_Rect rect = {  x + margin, y + margin, fgsurf->w + (2 * margin), fgsurf->h + (2 * margin) };
+    // prepare box geometry
     widget->rect = malloc(sizeof(SDL_Rect));
     RETURN_VAL_IF_ERR(widget->rect == NULL, -1, "couldn't allocate memory for Widget rect");
-    memcpy(widget->rect, &rect, sizeof(SDL_Rect));
+    widget->rect->x = 0;
+    widget->rect->y = 0;
+    widget->rect->w = 0;
+    widget->rect->h = 0;
 
-    // background texture
-    bgsurf = create_background_surface(widget->rect, widget->bgcol);
-        RETURN_VAL_IF_ERR(bgsurf == NULL, -1, "couldn't allocate memory for Widget texture (default)");
-    blitted = SDL_BlitSurface(fgsurf, NULL, bgsurf, &textclip);
-        RETURN_VAL_IF_ERR(blitted < 0, -1, "couldn't blit surfaces for Widget texture (default)");
-    widget->texture = malloc(sizeof(SDL_Texture*));
-        RETURN_VAL_IF_ERR(widget->texture == NULL, -1, "couldn't allocate memory for Widget texture (default)");
-    widget->texture = SDL_CreateTextureFromSurface(ren, bgsurf);
-        RETURN_VAL_IF_ERR(widget->texture == NULL, -1, "couldn't create default texture (default)");
+    // default texture
+    widget->texture = create_widget_texture(ren, font, widget->text, widget->type, widget->fgcol, widget->bgcol, xmargin, ymargin, wrap);
 
     // highlight texture
-    if(widget->hbgcol) {
-        hbgsurf = create_background_surface(widget->rect, widget->hbgcol);
-            RETURN_VAL_IF_ERR(hbgsurf == NULL, -1, "couldn't allocate memory for Widget texture (highlight)");
-        blitted = SDL_BlitSurface(fgsurf, NULL, hbgsurf, &textclip);
-            RETURN_VAL_IF_ERR(blitted < 0, -1, "couldn't blit surfaces for Widget texture (highlight)");
-        widget->htexture = malloc(sizeof(SDL_Texture*));
-            RETURN_VAL_IF_ERR(widget->texture == NULL, -1, "couldn't allocate memory for Widget texture (highlight)");
-        widget->htexture = SDL_CreateTextureFromSurface(ren, hbgsurf);
-            RETURN_VAL_IF_ERR(widget->texture == NULL, -1, "couldn't create default texture (highlight)");
+    if (widget->hbgcol) {
+        widget->htexture = create_widget_texture(ren, font, widget->text, widget->type, widget->fgcol, widget->hbgcol, xmargin, ymargin, wrap);
     }
 
-    // It is safe to pass NULL to SDL_FreeSurface.
-    SDL_FreeSurface(hbgsurf);
-    SDL_FreeSurface(bgsurf);
-    SDL_FreeSurface(fgsurf);
-
+    // update box geometry
+    SDL_QueryTexture(widget->texture, NULL, NULL, &(widget->rect->w), &(widget->rect->h));
     return 0;
+}
+
+/**
+ * Convenience method for setting widget position
+*/
+void widget_setPostion(Widget *widget, int x, int y) {
+    widget->rect->x = x;
+    widget->rect->y = y;
 }
 
 /**
