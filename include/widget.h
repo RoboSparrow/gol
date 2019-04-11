@@ -27,9 +27,12 @@ typedef struct WidgetConfig {
     WidgetType type;                // required
     WidgetState state;              // required: initial state, is updated by SDL events
     char *text;                     // required
-    SDL_Color *fgColor;             // required: default foreground (text) color, default: rgb(0,0,0)
-    SDL_Color *bgColor;             // optional: bg color, default: NULL
+    SDL_Color *fgColor;             // required: default fg (text) color, default: rgb(0,0,0)
+    SDL_Color *bgColor;             // optional: default bg color, default: NULL
+    SDL_Color *borderColor;         // optional: default border color, default: NULL
+    SDL_Color *fgColorH;            // required: highlight foreground (text) color, default: rgb(0,0,0)
     SDL_Color *bgColorH;            // optional: highlight bg color, default: NULL
+    SDL_Color *borderColorH;        // optional: highlight border color, default: NULL
     void (*action)(SDL_Event e);    // optional: action callback to be fired, default: NULL
     int paddingX;                   // optional: padding bg to text, default: 5
     int paddingY;                   // optional: padding bg to text, default: 5

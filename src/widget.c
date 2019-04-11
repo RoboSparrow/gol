@@ -4,7 +4,6 @@
 #include "widget.h"
 #include "utils.h"
 #include "state.h"
-
 /**
  * Creates a a rendering rect from widgte bounding box dimensions and an optional clipping rect
  * @param src widget bounding box rect
@@ -36,7 +35,7 @@ static void widget_render_decoration(Widget *widget, SDL_Renderer *ren, SDL_Rect
  * create a widget texture by blending sufaces for forground (text) and background
  */
 // todo free surfaces on error
-static SDL_Texture *create_widget_texture(SDL_Renderer *renderer, TTF_Font *font, char *text, WidgetType type, SDL_Color *fgColor, SDL_Color *bgColor, int paddingX, int paddingY, int wrap) {
+static SDL_Texture *create_widget_texture(SDL_Renderer *renderer, TTF_Font *font, char *text, WidgetType type, SDL_Color *fgColor, SDL_Color *bgColor, SDL_Color *borderColor, int paddingX, int paddingY, int wrap) {
     SDL_Surface *bgsurf;
     SDL_Surface *fgsurf;
     SDL_Texture* texture;
@@ -64,6 +63,19 @@ static SDL_Texture *create_widget_texture(SDL_Renderer *renderer, TTF_Font *font
 
     if (bgColor != NULL) {
         SDL_FillRect(bgsurf, NULL, SDL_MapRGB(bgsurf->format, bgColor->r, bgColor->g, bgColor->b));
+    }
+
+    if (borderColor != NULL) {
+        Uint32 bcol = SDL_MapRGB(bgsurf->format, borderColor->r, borderColor->g, borderColor->b);
+        SDL_Rect top = {0, 0, bgsurf->w, 1};
+        SDL_Rect left = {0, 0, 1, bgsurf->h};
+        SDL_Rect right = {bgsurf->w - 1, 0, 1, bgsurf->h};
+        SDL_Rect bottom = {0, bgsurf->h - 1, bgsurf->w, 1};
+
+        SDL_FillRect(bgsurf, &top, bcol);
+        SDL_FillRect(bgsurf, &left, bcol);
+        SDL_FillRect(bgsurf, &right, bcol);
+        SDL_FillRect(bgsurf, &bottom, bcol);
     }
 
     SDL_Rect fgclip = { paddingX, paddingY, bgsurf->w, bgsurf->h };
@@ -114,10 +126,25 @@ void widget_print_widgetconfig(WidgetConfig config) {
     } else {
         printf("    |_ [bg color] NULL\n");
     }
+    if (config.borderColor != NULL) {
+        printf("    |_ [border color] rgba(%d, %d, %d, %d)\n", config.borderColor->r, config.borderColor->g, config.borderColor->b, config.borderColor->a);
+    } else {
+        printf("    |_ [border color] NULL\n");
+    }
+    if (config.fgColorH != NULL) {
+        printf("    |_ [highlight fg color] rgba(%d, %d, %d, %d)\n", config.fgColorH->r, config.fgColorH->g, config.fgColorH->b, config.fgColorH->a);
+    } else {
+        printf("    |_ [highlight fg color] NULL\n");
+    }
     if (config.bgColorH != NULL) {
         printf("    |_ [highlight bg color] rgba(%d, %d, %d, %d)\n", config.bgColorH->r, config.bgColorH->g, config.bgColorH->b, config.bgColorH->a);
     } else {
         printf("    |_ [highlight bg color] NULL\n");
+    }
+    if (config.borderColorH != NULL) {
+        printf("    |_ [highlight border color] rgba(%d, %d, %d, %d)\n", config.borderColorH->r, config.borderColorH->g, config.borderColorH->b, config.borderColorH->a);
+    } else {
+        printf("    |_ [highlight border color] NULL\n");
     }
     if (config.action != NULL) {
         printf("    |_ [action callback] yes\n");
@@ -161,17 +188,17 @@ int widget_is_in_rect(int x, int y, SDL_Rect *rect) {
  * Initialize widget configuration with the minimal required properties
  */
 WidgetConfig widget_configure(int id, WidgetType type, char *text) {
-    SDL_Color fgColor = { 0, 0, 0 };
-    SDL_Color bgColor = { 255, 255, 255 };
-
     WidgetConfig config = {
         .id = id,
         .type = type,
         .state = WSTATE_DEFAULT,
         .text = text,
-        .fgColor = &fgColor,
-        .bgColor = &bgColor,
+        .fgColor = NULL,
+        .bgColor = NULL,
+        .borderColor = NULL,
+        .fgColorH = NULL,
         .bgColorH = NULL,
+        .borderColorH = NULL,
         .action = NULL,
         .paddingX = 5,
         .paddingY = 5,
@@ -239,11 +266,21 @@ Widget *widget_build(WidgetConfig config, SDL_Renderer *ren, TTF_Font *font) {
     }
 
     // default texture
-    widget->texture = create_widget_texture(ren, font, config.text, config.type, config.fgColor, config.bgColor, config.paddingX, config.paddingY, config.wrap);
+    widget->texture = create_widget_texture(ren, font, config.text, config.type, config.fgColor, config.bgColor, config.borderColor, config.paddingX, config.paddingY, config.wrap);
 
     // highlight texture
-    if (config.bgColorH != NULL) {
-        widget->htexture = create_widget_texture(ren, font, config.text, config.type, config.fgColor, config.bgColorH, config.paddingX, config.paddingY, config.wrap);
+    if (
+        config.fgColorH     != NULL ||
+        config.bgColorH     != NULL ||
+        config.borderColorH != NULL
+    ) {
+        SDL_Color *fgColorH;
+        SDL_Color *bgColorH;
+        SDL_Color *borderColorH;
+        fgColorH =     (config.fgColorH != NULL)     ? config.fgColorH : config.fgColor;
+        bgColorH =     (config.bgColorH != NULL)     ? config.bgColorH : config.bgColor;
+        borderColorH = (config.borderColorH != NULL) ? config.borderColorH : config.borderColor;
+        widget->htexture = create_widget_texture(ren, font, config.text, config.type, fgColorH, bgColorH, borderColorH, config.paddingX, config.paddingY, config.wrap);
     }
 
     // update box geometry
@@ -323,5 +360,4 @@ void widget_event(Widget *widget, SDL_Event e) {
         widget->state = WSTATE_HOVER;
         return;
     }
-
 }

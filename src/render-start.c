@@ -95,7 +95,7 @@ static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargi
         WidgetConfig config = widget_configure(wid++, WTYPE_BUTTON, pattern->title);
         config.fgColor = &(Colors.text);
         config.bgColor = &(Colors.bg);
-        config.bgColorH = &(Colors.contrast);
+        config.borderColorH = &(Colors.contrast);
         Widget *widget = widget_build(config, renderer, Fonts.body);
         widget_set_postion(widget, x, y);
         genlist_push(&patternWidgets, widget);
