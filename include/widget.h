@@ -22,23 +22,33 @@ typedef enum {
     WTYPE_BUTTON,
 } WidgetType;
 
-typedef struct Widget {
+typedef struct WidgetConfig {
+    int id;                         // required
     WidgetType type;                // required
+    WidgetState state;              // required: initial state, is updated by SDL events
     char *text;                     // required
-    SDL_Color *fgcol;               // required: default foreground (text) color, default: rgb(0,0,0)
-    SDL_Color *bgcol;               // required: default background color, transparent if NULL
-    SDL_Color *hbgcol;              // optional: highlight bg color, default: NULL
+    SDL_Color *fgColor;             // required: default foreground (text) color, default: rgb(0,0,0)
+    SDL_Color *bgColor;             // optional: bg color, default: NULL
+    SDL_Color *bgColorH;            // optional: highlight bg color, default: NULL
+    void (*action)(SDL_Event e);    // optional: action callback to be fired, default: NULL
+    int paddingX;                   // optional: padding bg to text, default: 5
+    int paddingY;                   // optional: padding bg to text, default: 5
+    int wrap;                       // optional: text wrapping width, default: 0
+} WidgetConfig;
+
+typedef struct Widget {
+    int id;                         // required
+    WidgetType type;                // required
+    WidgetState state;              // required: initial state, is updated by SDL events
     SDL_Rect *rect;                 // required: widget bounding box (x, y, w, h)
     SDL_Texture *texture;           // required: default texture
     SDL_Texture *htexture;          // optional: highlight texture, default NULL
-    WidgetState state;              // required: initial state, is updated by SDL events
     void (*action)(SDL_Event e);    // optinal: action callback to be fired, default: NULL
 } Widget;
 
-
-Widget *widget_new(WidgetType type, char *text, SDL_Color *fgcol, SDL_Color *bgcol, SDL_Color *hbgcol);
-int widget_build(Widget *widget, SDL_Renderer *ren, TTF_Font *font, int xmargin, int ymargin, int wrap);
-void widget_setPostion(Widget *widget, int x, int y);
+WidgetConfig widget_configure(int id, WidgetType type, char *text);
+Widget *widget_build(WidgetConfig config, SDL_Renderer *ren, TTF_Font *font);
+void widget_set_postion(Widget *widget, int x, int y);
 void widget_render(Widget *widget, SDL_Renderer *ren, SDL_Rect *clip);
 void widget_event(Widget *widget, SDL_Event e);
 void widget_destroy(Widget *widget);
@@ -47,4 +57,5 @@ void widget_destroy(Widget *widget);
 
 int widget_is_in_rect(int x, int y, SDL_Rect *rect);
 void widget_print_widget(Widget *widget);
+void widget_print_widgetconfig(WidgetConfig config);
 #endif

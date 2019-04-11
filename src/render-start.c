@@ -20,6 +20,8 @@ Widget *btn_quit = NULL;
 GenList patterns;
 GenList patternWidgets;
 
+int wid = 0; //todo static in widget func
+
 ////
 // control buttons
 ////
@@ -84,15 +86,18 @@ static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargi
     if(!patterns.length) {
         return;
     }
-    Widget *widget;
+
     Pattern *pattern;
     int height;
     for (int i = 0; i < patterns.length; i++) {
         pattern = (Pattern *) genlist_get(&patterns, i);
 
-        widget = widget_new(WTYPE_BUTTON, pattern->title, &(Colors.text), &(Colors.bg), &(Colors.contrast));
-        widget_build(widget, renderer, Fonts.body, 5, 5, 0);
-        widget_setPostion(widget, x, y);
+        WidgetConfig config = widget_configure(wid++, WTYPE_BUTTON, pattern->title);
+        config.fgColor = &(Colors.text);
+        config.bgColor = &(Colors.bg);
+        config.bgColorH = &(Colors.contrast);
+        Widget *widget = widget_build(config, renderer, Fonts.body);
+        widget_set_postion(widget, x, y);
         genlist_push(&patternWidgets, widget);
 
         height = widget->rect->h + yMargin;
@@ -140,7 +145,7 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
         // actions
         switch(widget->state) {
             case WSTATE_RELEASED:
-                printf("action %s: %s..\n", widget->text, pattern->file);
+                printf("action widget (id:%d): %s..\n", widget->id, pattern->file);
                 int merged = game_merge(world, pattern->file, world->cols / 2, world->rows / 2, PATTERN_CENTER);
                 EXIT_MINUS(merged, "main: could not load pattern file"); // TODO screen message!
                 int started = game_start(App, world);
@@ -164,14 +169,24 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
  */
 void screen_start_init(Pattern *world) {
 
-    // control buttons
-    btn_rand = widget_new(WTYPE_BUTTON, "Random game", &(Colors.bg), &(Colors.text), &(Colors.contrast));
-    widget_build(btn_rand, renderer, Fonts.body, 5, 5, 0);
-    widget_setPostion(btn_rand, 5, 5);
+    WidgetConfig config;
 
-    btn_quit = widget_new(WTYPE_BUTTON, "Quit Game", &(Colors.bg), &(Colors.text), &(Colors.contrast));
-    widget_build(btn_quit, renderer, Fonts.body, 5, 5, 0);
-    widget_setPostion(btn_quit, btn_rand->rect->x + btn_rand->rect->w + 2, 5);
+    // control buttons
+    config = widget_configure(wid++, WTYPE_BUTTON, "Random game");
+    config.fgColor = &(Colors.bg);
+    config.bgColor = &(Colors.text);
+    config.bgColorH = &(Colors.contrast);
+    config.paddingX = 10;
+    btn_rand = widget_build(config, renderer, Fonts.body);
+    widget_set_postion(btn_rand, 5, 5);
+
+    config = widget_configure(wid++, WTYPE_BUTTON, "Quit Game");
+    config.fgColor = &(Colors.bg);
+    config.bgColor = &(Colors.text);
+    config.bgColorH = &(Colors.contrast);
+    config.paddingX = 10;
+    btn_quit = widget_build(config, renderer, Fonts.body);
+    widget_set_postion(btn_quit, btn_rand->rect->x + btn_rand->rect->w + 2, 5);
 
     // pattern widget list
     genlist_init(&patternWidgets);
@@ -185,7 +200,7 @@ void screen_start_init(Pattern *world) {
         return;
     }
 
-    init_pattern_widgets(0, 50, 5, 5);
+    init_pattern_widgets(5, 50, 5, 5);
 }
 
 /**
