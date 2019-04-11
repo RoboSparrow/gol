@@ -152,7 +152,7 @@ Widget *widget_new(WidgetType type, char *text, SDL_Color *fgcol, SDL_Color *bgc
     widget->fgcol = malloc(sizeof(SDL_Color));
     RETURN_VAL_IF_ERR(widget->fgcol == NULL, NULL, "couldn't allocate memory for Widget fg color");
     if (fgcol == NULL) {
-        fprintf(stderr, "No foreground color set for widgdet!\n");
+        fprintf(stderr, "No foreground color set for widget!\n");
         widget->fgcol->r = 0;
         widget->fgcol->g = 0;
         widget->fgcol->b = 0;
