@@ -151,23 +151,39 @@ static void load_pattern_preview(Pattern *pattern) {
 
     SDL_Rect descriptionRect = { margin, margin, STARTSCREEN_PREVIEW_W, 0 };
     SDL_Rect patternRect = { margin, margin, STARTSCREEN_PREVIEW_W, STARTSCREEN_PREVIEW_W };
+    SDL_Rect statsRect = { margin, margin, STARTSCREEN_PREVIEW_W, 0 };
 
-    // render description
+    // description
+
     SDL_Texture *description = NULL;
     if(strlen(pattern->description)) {
         SDL_Surface *descSurface = TTF_RenderText_Blended_Wrapped(Fonts.body, pattern->description, Colors.text, STARTSCREEN_PREVIEW_W);
         if(descSurface != NULL) {
-            description = SDL_CreateTextureFromSurface(renderer, descSurface); //now you can convert it into a texture
+            description = SDL_CreateTextureFromSurface(renderer, descSurface);
         }
-        // render description
         if (description != NULL) {
             descriptionRect.w = descSurface->w;
             descriptionRect.h = descSurface->h;
-            patternRect.y = descSurface->h + margin;
+            patternRect.y = descSurface->h + (2 * margin);
         }
     }
 
-    previewTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, dim, dim + descriptionRect.h);
+    // stats
+    SDL_Texture *stats = NULL;
+    char statStr[100];
+    snprintf(statStr, 100, "columns: %d, rows: %d", pattern->cols, pattern->rows);
+    SDL_Surface *statsSurface = TTF_RenderText_Blended_Wrapped(Fonts.body, statStr, Colors.text, STARTSCREEN_PREVIEW_W);
+    if(statsSurface != NULL) {
+        stats = SDL_CreateTextureFromSurface(renderer, statsSurface);
+    }
+    if (stats != NULL) {
+        statsRect.w = statsSurface->w;
+        statsRect.h = statsSurface->h;
+        statsRect.y = patternRect.y + patternRect.h + margin;
+    }
+
+    int height = statsRect.y + statsRect.h + margin;
+    previewTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, dim, height);
     if(pattern == NULL) {
         LOG_ERROR_F("could not create preview texture for pattern file: %s", pattern->file);
         return;
@@ -185,6 +201,9 @@ static void load_pattern_preview(Pattern *pattern) {
     //render pattern
     render_pattern_static(pattern, patternRect, Colors.contrast, Colors.bg, Colors.text);
 
+    if (stats != NULL) {
+        SDL_RenderCopy(renderer, stats, NULL, &statsRect);
+    }
     SDL_RenderPresent(renderer);
     SDL_SetRenderTarget(renderer, NULL);
 }

@@ -13,7 +13,7 @@ x pattern and widget allocate/free pointers (char*, SDl structs)
 sdl:
 x widget blending color
 x view pattern static (for preview and future editor)
-- pattern preview: add cols/rows info
+x pattern preview: add cols/rows info
 - calculate screen frame dims and set dynamic size
 x zoom
 x pan
