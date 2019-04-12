@@ -48,10 +48,11 @@ void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world);
 void screen_world_clear();
 void screen_world_destroy();
 
+void render_pattern_static(Pattern *pattern, SDL_Rect board, SDL_Color fgbox, SDL_Color bgbox, SDL_Color cellcol);
 ////
 // utility functions
 ////
 
 void renderer_set_color(SDL_Color color);
-
+SDL_Color renderer_get_color();
 #endif

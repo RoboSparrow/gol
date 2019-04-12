@@ -22,6 +22,16 @@ GenList patternWidgets;
 
 int wid = 0; //todo static in widget func
 
+int previewId = -1;
+SDL_Texture *previewTexture = NULL;
+
+#ifndef STARTSCREEN_PREVIEW_W
+    #define STARTSCREEN_PREVIEW_W 200
+#endif
+
+int previewX = 0;
+int previewY = 0;
+
 ////
 // control buttons
 ////
@@ -122,6 +132,64 @@ static void render_pattern_widgets() {
 }
 
 /**
+ * renders a pattern preview into a texture
+ */
+static void load_pattern_preview(Pattern *pattern) {
+    int margin = 5;
+    int dim = (2 * margin) + STARTSCREEN_PREVIEW_W;
+
+    if(pattern == NULL) {
+        LOG_ERROR("preview pattern is NULL");
+        return;
+    }
+
+    int loaded = pattern_load_file(pattern->file, pattern, PATTERN_FULL);
+    if(loaded < 0) {
+        LOG_ERROR_F("could not load pattern file for preview: %s", pattern->file);
+        return;
+    }
+
+    SDL_Rect descriptionRect = { margin, margin, STARTSCREEN_PREVIEW_W, 0 };
+    SDL_Rect patternRect = { margin, margin, STARTSCREEN_PREVIEW_W, STARTSCREEN_PREVIEW_W };
+
+    // render description
+    SDL_Texture *description = NULL;
+    if(strlen(pattern->description)) {
+        SDL_Surface *descSurface = TTF_RenderText_Blended_Wrapped(Fonts.body, pattern->description, Colors.text, STARTSCREEN_PREVIEW_W);
+        if(descSurface != NULL) {
+            description = SDL_CreateTextureFromSurface(renderer, descSurface); //now you can convert it into a texture
+        }
+        // render description
+        if (description != NULL) {
+            descriptionRect.w = descSurface->w;
+            descriptionRect.h = descSurface->h;
+            patternRect.y = descSurface->h + margin;
+        }
+    }
+
+    previewTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, dim, dim + descriptionRect.h);
+    if(pattern == NULL) {
+        LOG_ERROR_F("could not create preview texture for pattern file: %s", pattern->file);
+        return;
+    }
+
+    SDL_SetTextureBlendMode(previewTexture, SDL_BLENDMODE_NONE);
+    SDL_SetRenderTarget(renderer, previewTexture);
+
+    renderer_set_color(Colors.grid);
+    SDL_RenderClear(renderer);
+
+    if (description != NULL) {
+        SDL_RenderCopy(renderer, description, NULL, &descriptionRect);
+    }
+    //render pattern
+    render_pattern_static(pattern, patternRect, Colors.contrast, Colors.bg, Colors.text);
+
+    SDL_RenderPresent(renderer);
+    SDL_SetRenderTarget(renderer, NULL);
+}
+
+/**
  * events for pattern widgets
  * @param e SDL Event from main()
  * @param App global App state from main(). The state may be updated
@@ -134,6 +202,7 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
 
     Widget *widget;
     Pattern *pattern;
+    int hasHovers = 0;
 
     for(int i = 0; i < patternWidgets.length; i++) {
         widget = (Widget *) genlist_get(&patternWidgets, i);
@@ -144,6 +213,16 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
 
         // actions
         switch(widget->state) {
+            case WSTATE_HOVER:
+                hasHovers = 1;
+                if(previewId != i) {
+                    previewId = i;
+                    // todo check against renderer w. h
+                    previewX = widget->rect->x + widget->rect->w + 20;
+                    previewY = widget->rect->y;
+                    load_pattern_preview(pattern);
+                }
+            break;
             case WSTATE_RELEASED:
                 printf("action widget (id:%d): %s..\n", widget->id, pattern->file);
                 int merged = game_merge(world, pattern->file, world->cols / 2, world->rows / 2, PATTERN_CENTER);
@@ -157,7 +236,13 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
         }
 
     }
+
+    if (!hasHovers) {
+         previewId = -1;
+         previewTexture = NULL;
+    }
 }
+
 
 ////
 // screen api
@@ -215,6 +300,14 @@ void screen_start_render() {
 
     render_pattern_widgets();
     SDL_RenderPresent(renderer);
+
+    if(previewTexture != NULL) {
+        SDL_Rect canvas = { previewX, previewY, 0, 0 };
+        SDL_QueryTexture(previewTexture, NULL, NULL, &(canvas.w), &(canvas.h));
+        SDL_RenderCopy(renderer, previewTexture, NULL, &canvas);
+        SDL_RenderPresent(renderer);
+    }
+
 }
 
 /**

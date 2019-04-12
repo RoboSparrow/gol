@@ -160,7 +160,6 @@ static void render_world_hints() {
 static void render_world_loop_cell(char cell, int index, int cols, int rows) {
     // SDL_Log("cell index %d, status %d", index, cell);
     if (cell == GOL_ALIVE) {
-
         int row = gol_row(index, cols);
         int col = gol_col(index, row, cols);
 
@@ -266,4 +265,3 @@ void screen_world_clear() {
 void screen_world_destroy() {
       SDL_DestroyTexture(hints);
 }
-

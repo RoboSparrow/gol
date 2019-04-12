@@ -91,3 +91,12 @@ void renderer_destroy() {
 void renderer_set_color(SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
+
+/**
+ * get current renderer drawing color
+ */
+SDL_Color renderer_get_color() {
+    SDL_Color col;
+    SDL_GetRenderDrawColor(renderer, &(col.r), &(col.g), &(col.b), &(col.a));
+    return col;
+}
