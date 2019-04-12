@@ -7,10 +7,13 @@ x replace pattern list with generic array (c++ vector like) solution
 - genlist functions, return int status instead void func to check success => pattern_load_patternlist()
 x pattern and widget allocate/free pointers (char*, SDl structs)
 - gol_merge_data: guard against src memory > targ
+- load pattern list: pagination
+- load pattern list: pagsort by mdate (savegame)
 
 sdl:
-- widget blending color
-- view pattern static (for preview and future editor)
+x widget blending color
+x view pattern static (for preview and future editor)
+- pattern preview: add cols/rows info
 - calculate screen frame dims and set dynamic size
 x zoom
 x pan
