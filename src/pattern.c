@@ -46,7 +46,6 @@ int pattern_load_patternlist(char *dirname, GenList *list) {
 
     // open dir
     DIR *dir;
-    int len = 0;
     struct dirent *e = NULL;
 
     Path path = "";
@@ -57,18 +56,6 @@ int pattern_load_patternlist(char *dirname, GenList *list) {
         LOG_ERROR_F("Unable able to open dir %s.", path);
         return -1;
     }
-
-    // get length
-    e = readdir(dir);
-    while(NULL != e){
-        char *fext = str_getfileext(e->d_name);
-        if(strcmp(fext, "rle") == 0 || strcmp(fext, "cells") == 0) {
-            // printf("%s\n", e->d_name);
-            len++;
-        }
-        e = readdir(dir);
-    }
-    rewinddir(dir);
 
     // read files and parse meta data
     int i = 0;
