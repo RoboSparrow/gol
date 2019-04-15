@@ -35,7 +35,7 @@ void renderer_destroy();
 
 void screen_start_init(Pattern *world);
 void screen_start_render();
-void screen_start_events(SDL_Event e, GlobalState *App, Pattern *world);
+void screen_start_events(SDL_Event e, Pattern *world);
 void screen_start_destroy();
 
 ////
@@ -44,7 +44,7 @@ void screen_start_destroy();
 
 void screen_world_init(Pattern *world);
 void screen_world_render(Pattern *world);
-void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world);
+void screen_world_events(SDL_Event e, Pattern *world);
 void screen_world_clear();
 void screen_world_destroy();
 

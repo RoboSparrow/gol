@@ -50,8 +50,12 @@ typedef struct SdlFonts {
 extern SdlColors Colors;
 extern SdlFonts Fonts;
 
-int game_start(GlobalState *App, Pattern *world);
-int game_restart(GlobalState *App, Pattern *world);
+extern GlobalState *App;
+GlobalState *appstate_init(int argc, char* argv[]);
+void appstate_destroy(GlobalState *state);
+
+int game_start(Pattern *world);
+int game_restart(Pattern *world);
 
 int game_save(Pattern *world, char *file);
 int game_load(Pattern *world, char *file);

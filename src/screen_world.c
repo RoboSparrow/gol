@@ -212,10 +212,9 @@ void screen_world_render(Pattern *world) {
 /**
  * manages events for this screen
  * @param e SDL Event from main()
- * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world) {
+void screen_world_events(SDL_Event e, Pattern *world) {
     const int step = 1;
 
     if (e.type == SDL_MOUSEWHEEL) {
@@ -243,7 +242,7 @@ void screen_world_events(SDL_Event e, GlobalState *App, Pattern *world) {
                 screen_world_clear();
                 paused = 0;
                 SDL_Delay(200);
-                int started = game_restart(App, world);
+                int started = game_restart(world);
                 EXIT_MINUS(started, "Could not restart game\n"); // TODO screen message!
             break;
         }

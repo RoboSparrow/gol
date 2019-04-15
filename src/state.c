@@ -20,7 +20,35 @@ SdlColors Colors = {
 
 SdlFonts Fonts; //populated by renderer
 
-int game_start(GlobalState *App, Pattern *world) {
+////
+// App
+////
+
+/**
+ * Allocate App state & set path to executable
+ */
+
+GlobalState *appstate_init(int argc, char* argv[]) {
+    GlobalState *state = malloc(sizeof(GlobalState));
+    if(state == NULL) {
+       LOG_ERROR("state state: could not allocate memory");
+       return NULL;
+    }
+    return state;
+}
+
+void appstate_destroy(GlobalState *state) {
+    if(state == NULL) {
+        return;
+    }
+    free(state);
+}
+
+////
+// game
+////
+
+int game_start(Pattern *world) {
     // autosave world
     int saved = pattern_save_file(AUTOSAVE_FILE, world);
     if (saved == -1) {
@@ -33,7 +61,7 @@ int game_start(GlobalState *App, Pattern *world) {
     return saved;
 }
 
-int game_restart(GlobalState *App, Pattern *world) {
+int game_restart(Pattern *world) {
     gol_clear_data(world->data);
     int loaded = pattern_load_file(AUTOSAVE_FILE, world, PATTERN_FULL);
     if (loaded == -1) {

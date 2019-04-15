@@ -121,6 +121,8 @@ static void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
         if(isdigit(row[i])) {
             digits[digitIndex] = row[i];
             digitIndex++;
+            digits[digitIndex] = '\0';
+            digitIndex++;
         }
 
         if(row[i] == RLE_CELL_DEAD || row[i] == RLE_CELL_ALIVE) {
@@ -128,7 +130,7 @@ static void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
             int amount = 1;
             if(digitIndex > 0) {
                 // parse
-                digits[digitIndex++] = '\0';
+                digits[digitIndex] = '\0';
                 amount = atoi(digits);
 
                 // reset

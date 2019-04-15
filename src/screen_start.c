@@ -13,6 +13,7 @@ extern SDL_Renderer *renderer;
 extern SdlColors Colors;
 extern SdlFonts Fonts;
 extern RendererInfo rendererInfo;
+extern GlobalState *App;
 
 Widget *btn_rand = NULL;
 Widget *btn_quit = NULL;
@@ -39,10 +40,9 @@ int previewY = 0;
 /**
  * events for "enter" button
  * @param e SDL Event from main()
- * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-static void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
+static void events_btn_rand(SDL_Event e, Pattern *world) {
     widget_event(btn_rand, e);
 
     switch(btn_rand->state) {
@@ -51,7 +51,7 @@ static void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
             gol_clear_data(world->data);
             gol_random(world);
             SDL_Delay(50);
-            game_start(App, world);
+            game_start(world);
             return;
         default:
             return;
@@ -61,10 +61,9 @@ static void events_btn_rand(SDL_Event e, GlobalState *App, Pattern *world) {
 /**
  * events for "quit" button
  * @param e SDL Event from main()
- * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-static void events_btn_quit(SDL_Event e, GlobalState *App, Pattern *world) {
+static void events_btn_quit(SDL_Event e, Pattern *world) {
     widget_event(btn_quit, e);
 
     switch(btn_quit->state) {
@@ -208,10 +207,9 @@ static void load_pattern_preview(Pattern *pattern) {
 /**
  * events for pattern widgets
  * @param e SDL Event from main()
- * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world)  {
+static void events_pattern_widgets(SDL_Event e, Pattern *world)  {
     if(!patternWidgets.length) {
         return;
     }
@@ -241,7 +239,7 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
                 printf("action widget (id:%d): %s..\n", widget->id, pattern->file);
                 int merged = game_merge(world, pattern->file, world->cols / 2, world->rows / 2, PATTERN_CENTER);
                 EXIT_MINUS(merged, "main: could not load pattern file"); // TODO screen message!
-                int started = game_start(App, world);
+                int started = game_start(world);
                 EXIT_MINUS(started, "Could not restart game"); // TODO screen message!
             break;
 
@@ -327,13 +325,12 @@ void screen_start_render() {
 /**
  * manages events for this screen
  * @param e SDL Event from main()
- * @param App global App state from main(). The state may be updated
  * @param world world pattern
  */
-void screen_start_events(SDL_Event e, GlobalState *App, Pattern *world) {
-    events_btn_rand(e, App, world);
-    events_btn_quit(e, App, world);
-    events_pattern_widgets(e, App, world);
+void screen_start_events(SDL_Event e, Pattern *world) {
+    events_btn_rand(e, world);
+    events_btn_quit(e, world);
+    events_pattern_widgets(e, world);
 }
 
 /**

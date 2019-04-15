@@ -8,6 +8,9 @@
 #include "utils.h"
 #include "state.h"
 #include "gol.h"
+
+extern GlobalState *App;
+
 /**
  * helper input for init_parse_args -l
  */
@@ -55,7 +58,7 @@ void init_set_rootdir(int argc, char *argv[], Path path) {
  * @param param file path to be filled with file path on option -f
  * @return 1 if skipping start screen and enter world screen directly or 0, -1 on error
  */
-int init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, Path patternfile) {
+int init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
     int opt = 0;
     int cols = 0;
     int rows = 0;
@@ -85,7 +88,7 @@ int init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, Pa
                 strcpy(patternfile, pattern->file);
 
                 // switch to world screen
-                app->screen = SDL_SCREEN_WORLD;
+                App->screen = SDL_SCREEN_WORLD;
 
                 genlist_free(&patterns);
                 // exit(EXIT_SUCCESS);
@@ -102,7 +105,7 @@ int init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, Pa
             // valgrind: run once only
             case 'V':
                 printf("-V option (valgrind) run loop once and exit\n");
-                app->state = APP_STATE_ONCE;
+                App->state = APP_STATE_ONCE;
             break;
             case 'h':
             case '?':
