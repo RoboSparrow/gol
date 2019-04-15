@@ -27,7 +27,9 @@ int game_start(GlobalState *App, Pattern *world) {
         LOG_ERROR_F("Could not save pattern file: %s", AUTOSAVE_FILE);
     }
     App->screen = SDL_SCREEN_WORLD;
-    App->state = APP_STATE_RUNNING;
+    if(App->state < APP_STATE_ONCE) {// todo simplify
+        App->state = APP_STATE_RUNNING;
+    }
     return saved;
 }
 
@@ -38,10 +40,13 @@ int game_restart(GlobalState *App, Pattern *world) {
         LOG_ERROR_F("Could not load pattern file: %s", AUTOSAVE_FILE);
     }
     App->screen = SDL_SCREEN_WORLD;
-    App->state = APP_STATE_RUNNING;
+    if(App->state < APP_STATE_ONCE) {// todo simplify
+        App->state = APP_STATE_RUNNING;
+    }
     return loaded;
 }
 
+// unused
 int game_save(Pattern *world, char *file) {
     int saved = pattern_save_file(file, world);
     if (saved == -1) {

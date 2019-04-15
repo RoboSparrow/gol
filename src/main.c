@@ -34,11 +34,13 @@ int main(int argc, char* argv[]) {
     EXIT_NULL(world, "could not allocate memory(1) for world pattern");
 
     // merge args
-    init_parse_args(argc, argv, &App, world, patternfile);
+    int skipstartscreen = init_parse_args(argc, argv, &App, world, patternfile);
 
-    // init world data
-    world->data = gol_allocate_data(world->data, world->cols, world->rows);
-    EXIT_NULL(world->data, "could not allocate memory(2) for world pattern");
+    // init world data,  pattern may be loaded in init-parse_args see init->random
+    if(world->state <= PATTERN_META) {
+        world->data = gol_allocate_data(world->data, world->cols, world->rows);
+        EXIT_NULL(world->data, "could not allocate memory(2) for world pattern");
+    }
 
     // init sdl & screens
     renderer_init(world);
@@ -49,6 +51,10 @@ int main(int argc, char* argv[]) {
         // game was started from cli with -l selection
         int merged = game_merge(world, patternfile, world->cols / 2, world->rows / 2, PATTERN_CENTER);
         EXIT_MINUS(merged, "main: could not load pattern file");
+        game_start(&App, world);
+    }
+
+    if(skipstartscreen) {
         game_start(&App, world);
     }
 

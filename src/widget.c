@@ -217,7 +217,11 @@ Widget *widget_new() {
     widget->type = WTYPE_BUTTON;
     widget->state = WSTATE_DEFAULT;
     widget->rect = malloc(sizeof(SDL_Rect));
-        RETURN_VAL_IF_ERR(widget->rect == NULL, NULL, "couldn't allocate memory for Widget rect");
+        if (widget->rect == NULL) {
+            free(widget);
+            LOG_ERROR("couldn't allocate memory for Widget rect");
+            return NULL;
+        };
     widget->rect->x = 0;
     widget->rect->y = 0;
     widget->rect->w = 0;
@@ -245,7 +249,6 @@ void widget_destroy( Widget *widget ) {
     if (widget->htexture != NULL) {
         SDL_DestroyTexture(widget->htexture);
     }
-    widget = NULL;
 }
 
 /**

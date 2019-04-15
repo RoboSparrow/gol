@@ -94,15 +94,15 @@ static void render_world_background(int cols, int rows) {
     int xi = unit.w % cols;
     int yi = unit.h % rows;
 
-    int i, x, y;
+    int i;
     for (i = 0; i <= cols; i++) {
         // vertical lines
-        x = (xi * i) + x0;
+        int x = (xi * i) + x0;
         SDL_RenderDrawLine(renderer, x, y0, x, y1);
     }
     for (i = 0; i <= rows; i++) {
         // horizontal lines
-        y = (yi * i) + y0;
+        int y = (yi * i) + y0;
         SDL_RenderDrawLine(renderer, x0, y, x1, y);
     }
 }

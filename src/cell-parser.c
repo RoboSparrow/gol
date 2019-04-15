@@ -265,7 +265,9 @@ pattern_state cell_load_pattern(char *file, Pattern *pattern, pattern_state targ
     }
     pattern->state = PATTERN_FULL;
 
-    fclose(fp);
+    if (fp != NULL) { //cpp-check
+        fclose(fp);
+    }
     return pattern->state;
 }
 

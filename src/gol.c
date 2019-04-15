@@ -141,10 +141,12 @@ void gol_random(Pattern *world) {
 char *gol_allocate_data(char *data, int cols, int rows) {
     // prepare data
     size_t size = (rows * cols) + 1;
+
     if (data == NULL) {
-        data = malloc(size * sizeof(char));
+        data = malloc(size);
     } else {
-        data = realloc(data, size * sizeof(char));
+        // strlen instead size to avoid mem corruption
+        data = realloc(data, strlen(data) + 1);
     }
 
     if (data == NULL) {
@@ -152,8 +154,7 @@ char *gol_allocate_data(char *data, int cols, int rows) {
         return NULL;
     }
     // fill data with default cell value (dead)
-    memset(data, GOL_DEAD, size - 1);
-    data[size] = '\0';
+    memset(data, GOL_DEAD, size);
     return data;
 }
 
@@ -163,7 +164,7 @@ char *gol_allocate_data(char *data, int cols, int rows) {
  */
 void gol_clear_data(char *data) {
     // prepare data
-    memset(data, GOL_DEAD, strlen(data) * sizeof(char));
+    memset(data, GOL_DEAD, strlen(data));
 }
 
 /**
@@ -187,8 +188,6 @@ void gol_free_data(char *data) {
  * @param offsetrows target y-offset, number of rows
  */
 void gol_merge_data(Pattern *src, Pattern *targ, int offset_cols, int offset_rows) {
-    int index = 0;
-
     int s_rows = src->rows;
     int s_cols = src->cols;
     char *s_data = src->data;
@@ -202,7 +201,7 @@ void gol_merge_data(Pattern *src, Pattern *targ, int offset_cols, int offset_row
         if (offset_rows + r > t_rows) {
             break;
         }
-        index = (r + offset_rows) * t_cols + offset_cols;
+        int index = (r + offset_rows) * t_cols + offset_cols;
 
         for (int c = 0; c < s_cols; c++) {
             // boundary

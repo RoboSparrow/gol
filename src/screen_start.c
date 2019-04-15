@@ -97,10 +97,8 @@ static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargi
         return;
     }
 
-    Pattern *pattern;
-    int height;
     for (int i = 0; i < patterns.length; i++) {
-        pattern = (Pattern *) genlist_get(&patterns, i);
+        Pattern *pattern = (Pattern *) genlist_get(&patterns, i);
 
         WidgetConfig config = widget_configure(wid++, WTYPE_BUTTON, pattern->title);
         config.fgColor = &(Colors.text);
@@ -110,7 +108,7 @@ static void init_pattern_widgets(int startX, int startY, int xMargin, int yMargi
         widget_set_postion(widget, x, y);
         genlist_push(&patternWidgets, widget);
 
-        height = widget->rect->h + yMargin;
+        int height = widget->rect->h + yMargin;
         y += height;
     }
 }
@@ -123,9 +121,8 @@ static void render_pattern_widgets() {
         return;
     }
 
-    Widget *widget;
     for(int i = 0; i < patternWidgets.length; i++) {
-        widget = (Widget *) genlist_get(&patternWidgets, i);
+        Widget *widget = (Widget *) genlist_get(&patternWidgets, i);
         // widgets_print_widgets(widget);
         widget_render(widget, renderer, NULL);
     }
@@ -184,7 +181,7 @@ static void load_pattern_preview(Pattern *pattern) {
 
     int height = statsRect.y + statsRect.h + margin;
     previewTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, dim, height);
-    if(pattern == NULL) {
+    if(previewTexture == NULL) {
         LOG_ERROR_F("could not create preview texture for pattern file: %s", pattern->file);
         return;
     }
@@ -219,13 +216,11 @@ static void events_pattern_widgets(SDL_Event e, GlobalState *App, Pattern *world
         return;
     }
 
-    Widget *widget;
-    Pattern *pattern;
     int hasHovers = 0;
 
     for(int i = 0; i < patternWidgets.length; i++) {
-        widget = (Widget *) genlist_get(&patternWidgets, i);
-        pattern = (Pattern *) genlist_get(&patterns, i);
+        Widget *widget = (Widget *) genlist_get(&patternWidgets, i);
+        Pattern *pattern = (Pattern *) genlist_get(&patterns, i);
 
         // default events
         widget_event(widget, e);

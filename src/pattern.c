@@ -58,7 +58,6 @@ int pattern_load_patternlist(char *dirname, GenList *list) {
     }
 
     // read files and parse meta data
-    int i = 0;
     e = readdir(dir);
     while(NULL != e){
         char *fext = str_getfileext(e->d_name);
@@ -83,7 +82,6 @@ int pattern_load_patternlist(char *dirname, GenList *list) {
                     LOG_ERROR_F("error loading pattern file %s", pattern->file);
                 } else {
                     genlist_push(list, pattern);
-                    i++;
                 }
         }
 
@@ -130,7 +128,9 @@ void pattern_print_pattern(Pattern *pattern) {
     printf("    |_ cols: %d\n", pattern->cols);
     printf("    |_ rows: %d\n", pattern->rows);
     printf("    |_ state: %s\n", (pattern->state < 3) ? pattern_state_names[pattern->state] : "UNKNOWN");
-    if(pattern->data) {
+    if(pattern->data == NULL) {
+        printf("    |_ data: NULL\n");
+    } else {
         printf("    |_ data:\n");
         gol_print_data(pattern->data, pattern->cols, pattern->rows);
     }
@@ -141,7 +141,7 @@ void pattern_print_pattern(Pattern *pattern) {
  * @param file file to load
  * @param pattern allocated Pattern to load into
  * @param targ_state flag, which level data should be loaded
- * @return -1 on error, else length of merged pattern data
+ * @return -1 on error
  */
 int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
 
@@ -171,6 +171,27 @@ int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
 
     LOG_ERROR_F("pattern: No parser found for file (load)%s.", path);
     return -1;
+}
+
+/**
+ * Create random pattern
+ * @param pattern allocated Pattern to load into
+ * @param targ_state flag, which level data should be loaded
+ * @return -1 on error
+ */
+int pattern_create_random(Pattern *pattern, pattern_state targ_state) {
+    if (!pattern->cols || !pattern->rows) {
+        LOG_ERROR("random pattern: No cols or rows defined!");
+        return -1;
+    }
+    if(targ_state == PATTERN_META) {
+        pattern->state = PATTERN_META;
+        return 0;
+    }
+    pattern->data = gol_allocate_data(pattern->data, pattern->cols, pattern->rows);
+    gol_random(pattern);
+    pattern->state = PATTERN_FULL;
+    return 0;
 }
 
 /**

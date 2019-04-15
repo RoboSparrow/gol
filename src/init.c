@@ -7,7 +7,7 @@
 #include "pattern.h"
 #include "utils.h"
 #include "state.h"
-
+#include "gol.h"
 /**
  * helper input for init_parse_args -l
  */
@@ -25,8 +25,8 @@ static void cli_print_patternlist(GenList *list) {
 static int select_pattern(int len) {
     printf("--------------\n");
     int selected = 0;
-    int cl;
     do {
+        int cl;
         printf("select pattern: ");
         scanf("%d", &selected);
         while((cl = getchar()) != EOF && cl != '\n'); //clean the buffer
@@ -38,14 +38,13 @@ static int select_pattern(int len) {
 /**
  * Sets path to executable
  */
-void init_set_rootdir(int argc, char* argv[], Path path) {
+void init_set_rootdir(int argc, char *argv[], Path path) {
     // TODO this needs to be made compatible for OS and runtime modes
     if(*argv[0] == '/') {
-        strcpy(path, argv[0]);
+        strcpy(path, dirname(argv[0]));
     } else {
-        realpath(argv[0], path);
+        realpath(dirname(argv[0]), path);
     }
-    strcpy(path, dirname(path));
     if(access(path, R_OK)) {
        LOG_ERROR_F("init: could not define or access path to executable (%s).", path);
     }
@@ -54,11 +53,14 @@ void init_set_rootdir(int argc, char* argv[], Path path) {
 /**
  * parses cli args in to world pattern
  * @param param file path to be filled with file path on option -f
+ * @return 1 if skipping start screen and enter world screen directly or 0, -1 on error
  */
-void init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, Path patternfile) {
+int init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, Path patternfile) {
     int opt = 0;
     int cols = 0;
     int rows = 0;
+    int createRandomWorld = 0;
+    int skipstartscreen = 0;
 
     char usage[] = "usage: %s [-l listpatternsandselect] [-c numberofcols] [-r numberofrows] [-p pathtopatternfile][-R enterrandomworld]\n";
     while ((opt = getopt(argc, argv, "r:c:p:h:lRV")) != -1) {
@@ -94,7 +96,8 @@ void init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, P
             break;
             // directly go to random world
             case 'R':
-                app->screen =  SDL_SCREEN_WORLD;
+                createRandomWorld = 1;
+                skipstartscreen = 1;
             break;
             // valgrind: run once only
             case 'V':
@@ -111,5 +114,11 @@ void init_parse_args(int argc, char* argv[], GlobalState *app, Pattern *world, P
 
     world->cols = (cols > 0) ? cols : 50;
     world->rows = (rows > 0) ? rows : world->cols;
+
+    if (createRandomWorld) {
+        pattern_create_random(world, PATTERN_FULL);
+    }
+
+    return skipstartscreen;
     // pattern_print_pattern(world);
 }

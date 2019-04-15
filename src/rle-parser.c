@@ -164,18 +164,16 @@ static int rle_parse_data(FILE *fp, Pattern *pattern) {
     int len = pattern->rows * pattern->cols;
     int i = 0;
     int rowIndex = 0;
-    char ch;
 
     char row[pattern->cols + 1];
 
     while(1) {
-
         if(i >= len) {
             LOG_ERROR("pattern data larger than (cols * rows), skipping parsing.");
             break;
         }
 
-        ch = fgetc(fp);
+        char ch = fgetc(fp);
 
         if(feof(fp)) {
             break ;
@@ -268,10 +266,6 @@ static int rle_load_meta(FILE *fp, Pattern *pattern) {
  */
 static int rle_load_data(FILE *fp, Pattern *pattern) {
     rewind (fp); // TODO use fseek, this should not be neccessary
-
-    int i = 0;
-    char identifier;
-
     // guard
     if (pattern->state < PATTERN_META) {
          LOG_ERROR("error loading pattern data before loading meta meta.");
@@ -280,14 +274,14 @@ static int rle_load_data(FILE *fp, Pattern *pattern) {
     }
 
     // scan through non-data lines
-    for (i = 0; 1; i++) {
+    for (int i = 0; 1; i++) {
         char line[LINE_BOUNDS];
         //EOF
         if (fgets(line, LINE_BOUNDS, fp) == NULL) {
             break;
         }
 
-        identifier = tolower(line[0]);
+        char identifier = tolower(line[0]);
         if (identifier == '#') {
             continue;
         }
@@ -350,7 +344,9 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
     }
     pattern->state = PATTERN_FULL;
 
-    fclose(fp);
+    if (fp != NULL) { //cpp-check
+        fclose(fp);
+    }
     return pattern->state;
 }
 

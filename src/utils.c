@@ -230,5 +230,4 @@ void genlist_free(GenList *list) {
     if(list->items != NULL) {
         free(list->items);
     }
-    list = NULL;
 }
