@@ -9,6 +9,7 @@ x pattern and widget allocate/free pointers (char*, SDl structs)
 - gol_merge_data: guard against src memory > targ
 - load pattern list: pagination
 - load pattern list: pagsort by mdate (savegame)
+- optarg -R game starting with empty world screen
 
 sdl:
 x widget blending color
