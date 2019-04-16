@@ -77,7 +77,7 @@ int init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
             case 'l': {
                 GenList patterns;
                 genlist_init(&patterns);
-                int loaded = pattern_load_patternlist("patterns", &patterns);
+                int loaded = pattern_load_patternlist("patterns", &patterns, PATTERN_SORT_TITLE);
                 EXIT_MINUS(loaded, "init: Unable to load pattern list.");
                 cli_print_patternlist(&patterns);
 
@@ -123,5 +123,4 @@ int init_parse_args(int argc, char* argv[], Pattern *world, Path patternfile) {
     }
 
     return skipstartscreen;
-    // pattern_print_pattern(world);
 }

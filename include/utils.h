@@ -29,7 +29,7 @@ int str_startswith(char *search, char *str);
 void str_nospaces(char* source);
 char *str_trim(char *str);
 void str_tolower(char *str);
-char *str_getfileext(char *filename);
+
 int path_build(char *segment, Path path);
 
 #define GENLIST_INIT_SIZE 5

@@ -290,7 +290,7 @@ void screen_start_init(Pattern *world) {
 
     // load patterns
     genlist_init(&patterns);
-    int loaded = pattern_load_patternlist("patterns", &patterns);
+    int loaded = pattern_load_patternlist("patterns", &patterns, PATTERN_SORT_TITLE);
 
     if(loaded < 0) {
         LOG_ERROR("init: Unable to load pattern list.");

@@ -64,17 +64,6 @@ void str_tolower(char *str) {
 }
 
 /**
- * extracts file extension from a string
- */
-char *str_getfileext(char *filename) {
-    char *dot = strrchr(filename, '.');
-    if(!dot || dot == filename) {
-        return "";
-    }
-    return dot + 1;
-}
-
-/**
  * TODO
  * Resolves a path segment based on the current working directory
  * If no segment is passed, the function will return the absolute path of the current working directory.
