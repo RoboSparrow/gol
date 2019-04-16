@@ -85,7 +85,6 @@ static void update_board(int cols, int rows) {
  * @param rows world data matrix height
  */
 static void render_world_background(int cols, int rows) {
-
     int x0 = board.x;
     int x1 = board.x + board.w;
     int y0 = board.y;

@@ -22,7 +22,8 @@
 #define RETURN_VOID_IF_ERR(expr, msg) if (expr) { LOG_ERROR(msg); return; }
 #define RETURN_VAL_IF_ERR(expr, val, msg)  if (expr) { LOG_ERROR(msg); return val; }
 
-typedef char Path[PATH_MAX];
+#define MAX_PATH_LENGTH PATH_MAX
+typedef char Path[MAX_PATH_LENGTH];
 
 int str_startswith(char *search, char *str);
 void str_nospaces(char* source);

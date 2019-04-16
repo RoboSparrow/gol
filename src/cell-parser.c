@@ -225,20 +225,17 @@ static int cell_load_data(FILE *fp, Pattern *pattern) {
 // api
 ////
 
-pattern_state cell_load_pattern(char *file, Pattern *pattern, pattern_state targ_state) {
-    // always
-    strcpy(pattern->file, file);
-
-    FILE *fp = fopen(file, "r");
+pattern_state cell_load_pattern(Pattern *pattern, pattern_state targ_state) {
+    FILE *fp = fopen(pattern->file, "r");
     if (fp == NULL) {
-        LOG_ERROR_F("Error while opening the file %s.", file);
+        LOG_ERROR_F("Error while opening the file %s.", pattern->file);
         return PATTERN_NONE;
     }
 
     // ...meta
     int loaded  = cell_load_meta(fp, pattern);
     if(loaded < 0) {
-        LOG_ERROR_F("error loading pattern file meta %s.", file);
+        LOG_ERROR_F("error loading pattern file meta %s.", pattern->file);
         fclose(fp);
         return PATTERN_NONE;
     }
@@ -259,7 +256,7 @@ pattern_state cell_load_pattern(char *file, Pattern *pattern, pattern_state targ
 
     int parsed = cell_load_data(fp, pattern);
     if(parsed < 0) {
-        LOG_ERROR_F("error loading pattern file data %s.", file);
+        LOG_ERROR_F("error loading pattern file data %s.", pattern->file);
         fclose(fp);
         return PATTERN_NONE;
     }

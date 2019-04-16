@@ -140,13 +140,15 @@ void gol_random(Pattern *world) {
  */
 char *gol_allocate_data(char *data, int cols, int rows) {
     // prepare data
-    size_t size = (rows * cols) + 1;
+    size_t size;
 
     if (data == NULL) {
+        size = (rows * cols) + 1;
         data = malloc(size);
     } else {
         // strlen instead size to avoid mem corruption
-        data = realloc(data, strlen(data) + 1);
+        size = strlen(data) + 1;
+        data = realloc(data, size);
     }
 
     if (data == NULL) {
@@ -155,6 +157,7 @@ char *gol_allocate_data(char *data, int cols, int rows) {
     }
     // fill data with default cell value (dead)
     memset(data, GOL_DEAD, size);
+    data[size - 1] = '\0';
     return data;
 }
 
@@ -164,7 +167,7 @@ char *gol_allocate_data(char *data, int cols, int rows) {
  */
 void gol_clear_data(char *data) {
     // prepare data
-    memset(data, GOL_DEAD, strlen(data));
+    memset(data, GOL_DEAD, strlen(data) + 1);
 }
 
 /**

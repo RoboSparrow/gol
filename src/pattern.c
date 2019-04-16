@@ -63,19 +63,16 @@ int pattern_load_patternlist(char *dirname, GenList *list) {
         char *fext = str_getfileext(e->d_name);
         if(strcmp(fext, "rle") == 0 || strcmp(fext, "cells") == 0) {
                 Pattern *pattern = pattern_allocate_pattern();
-
-                strcpy(pattern->file, path);
-                strcat(pattern->file, "/");
-                strcat(pattern->file, e->d_name);
+                snprintf(pattern->file, MAX_PATH_LENGTH, "%s/%s", path, e->d_name);
 
                 pattern_state loaded;
                 // insert parser of choice here
                 if (strcmp(fext, "rle") == 0) {
-                    loaded = rle_load_pattern(pattern->file, pattern, PATTERN_META);
+                    loaded = rle_load_pattern(pattern, PATTERN_META);
                 }
 
                 if (strcmp(fext, "cells") == 0) {
-                    loaded = cell_load_pattern(pattern->file, pattern, PATTERN_META);
+                    loaded = cell_load_pattern(pattern, PATTERN_META);
                 }
 
                 if(loaded != PATTERN_META) {
@@ -148,13 +145,11 @@ int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
     // todo path_build?
     char *ext = str_getfileext(file);
 
-    Path path = "";
-    path_build(file, path);
-
+    path_build(file, pattern->file);
     pattern->state = PATTERN_NONE;
 
     if (strcmp(ext, "rle") == 0) {
-        pattern_state state = rle_load_pattern(path, pattern, targ_state);
+        pattern_state state = rle_load_pattern(pattern, targ_state);
         if(state != targ_state) {
             return -1;
         }
@@ -162,14 +157,14 @@ int pattern_load_file(char *file, Pattern *pattern, pattern_state targ_state) {
     }
 
     if (strcmp(ext, "cells") == 0) {
-        pattern_state state = cell_load_pattern(path, pattern, targ_state);
+        pattern_state state = cell_load_pattern(pattern, targ_state);
         if(state != targ_state) {
             return -1;
         }
         return 0;
     }
 
-    LOG_ERROR_F("pattern: No parser found for file (load)%s.", path);
+    LOG_ERROR_F("pattern: No parser found for file (load)%s.", pattern->file);
     return -1;
 }
 

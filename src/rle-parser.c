@@ -107,10 +107,8 @@ static int rle_parse_header(char *line, Pattern *pattern) {
  * @param pattern Pattern struct
  */
 static void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
-
     int index = rowOffset * pattern->cols;
     int len = strlen(row);
-    // printf("row: %s, rowOffset: %d, index %d, length: %d\n", row, rowOffset, index, len);
 
     char digits[len];
     int digitIndex = 0;
@@ -121,8 +119,7 @@ static void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
         if(isdigit(row[i])) {
             digits[digitIndex] = row[i];
             digitIndex++;
-            digits[digitIndex] = '\0';
-            digitIndex++;
+            digits[digitIndex + 1] = '\0';
         }
 
         if(row[i] == RLE_CELL_DEAD || row[i] == RLE_CELL_ALIVE) {
@@ -132,7 +129,6 @@ static void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
                 // parse
                 digits[digitIndex] = '\0';
                 amount = atoi(digits);
-
                 // reset
                 digits[0] = '\0';
                 digitIndex = 0;
@@ -140,17 +136,14 @@ static void rle_parse_data_row(char *row, int rowOffset, Pattern *pattern) {
 
             // write group
             char cell = (row[i] == RLE_CELL_DEAD) ? GOL_DEAD : GOL_ALIVE;
-            // printf("---> %d -, amount %d: cell %d \n", index, amount, cell);
             for(int k = 0; k < amount; k++) {
                 pattern->data[index] = cell;
-                //printf("#%d: %c %d\n", index, cell, pattern->data[index]);
                 index++;
             }
 
         }
-
         i++;
-    }
+    } // while
 }
 
 /**
@@ -307,20 +300,17 @@ static int rle_load_data(FILE *fp, Pattern *pattern) {
 // api
 ////
 
-pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_state) {
-    // always
-    strcpy(pattern->file, file);
-
-    FILE *fp = fopen(file, "r");
+pattern_state rle_load_pattern(Pattern *pattern, pattern_state targ_state) {
+    FILE *fp = fopen(pattern->file, "r");
     if (fp == NULL) {
-        LOG_ERROR_F("Error while opening the file %s.", file);
+        LOG_ERROR_F("Error while opening the file %s.", pattern->file);
         return PATTERN_NONE;
     }
 
     // ...meta
     int loaded  = rle_load_meta(fp, pattern);
     if(loaded < 0) {
-        LOG_ERROR_F("error loading pattern file meta %s.", file);
+        LOG_ERROR_F("error loading pattern file meta %s.", pattern->file);
         fclose(fp);
         return PATTERN_NONE;
     }
@@ -340,7 +330,7 @@ pattern_state rle_load_pattern(char *file, Pattern *pattern, pattern_state targ_
 
     int parsed = rle_load_data(fp, pattern);
     if(parsed < 0) {
-        LOG_ERROR_F("error loading pattern file data %s.", file);
+        LOG_ERROR_F("error loading pattern file data %s.", pattern->file);
         fclose(fp);
         return PATTERN_NONE;
     }
