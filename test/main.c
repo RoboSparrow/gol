@@ -6,6 +6,7 @@
 #include "test.h"
 
 Path FS_ROOT_DIR;
+GlobalState *App = NULL;
 
 void test_init_pattern(Pattern *pattern) {
     DESCRIBE("inititializes empty pattern");
@@ -22,6 +23,7 @@ void test_init_pattern(Pattern *pattern) {
 
 int main(int argc, char* argv[]) {
     init_set_rootdir(argc, argv, FS_ROOT_DIR);
+    App = appstate_init(argc, argv);
     Pattern *pattern;
 
     //// RLE parser
