@@ -14,7 +14,5 @@ cli usage:
 <path-to-bin>/gol [-l listpatternsandselect] [-c numberofcols] [-r numberofrows] [-p pathtopatternfile][-R enterrandomworld]
 ```
 
-Font: Hellovetica by [Cal Henderson](https://www.iamcal.com/misc/fonts/)
-
 
 
