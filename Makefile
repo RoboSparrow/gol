@@ -40,7 +40,7 @@ obj/%.o: src/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 assets:
-	cp -a -f assets/fonts/*.ttf bin/assets/
+	mkdir -p bin/assets && cp -a -f assets/fonts/*.ttf bin/assets/
 	mkdir -p bin/patterns && cp -a -f assets/patterns/. bin/patterns/
 	mkdir -p bin/save
 

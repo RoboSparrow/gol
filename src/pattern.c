@@ -117,7 +117,10 @@ int pattern_load_patternlist(char *dirname, GenList *list, PatternSort order) {
     e = readdir(dir);
     while(NULL != e){
         Path file;
-        snprintf(file, MAX_PATH_LENGTH, "%s/%s", path, e->d_name);
+        int res = snprintf(file, MAX_PATH_LENGTH, "%s/%s", path, e->d_name);
+        if (res < 0) {
+            LOG_ERROR_F("error genereating file name from %s", e->d_name); // circumvent gcc format-truncation warning: https://bugzilla.redhat.com/show_bug.cgi?id=1431678
+        }
 
         if(pattern_get_type(file) != PATTERN_TYPE_NONE) {
             Pattern *pattern = pattern_allocate_pattern();
