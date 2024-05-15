@@ -126,11 +126,12 @@ void gol_update(Pattern *world, void (*render_cell)(char cell, int index, int co
  */
 void gol_random(Pattern *world) {
     srand(time(NULL));
-    int size = world->cols * world->rows;
+    int size = (world->cols * world->rows) + 1;
     char *data = world->data;
     for (int i = 0; i < size; i++) {
        data[i] = (rand() % 2) ? GOL_ALIVE : GOL_DEAD;
     }
+    data[size - 1] = '\0';
 }
 
 /**
