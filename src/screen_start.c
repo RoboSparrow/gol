@@ -122,7 +122,7 @@ static void render_pattern_widgets() {
 
     for(int i = 0; i < patternWidgets.length; i++) {
         Widget *widget = (Widget *) genlist_get(&patternWidgets, i);
-        // widgets_print_widgets(widget);
+        // widget_print_widget(widget);
         widget_render(widget, renderer, NULL);
     }
 }
