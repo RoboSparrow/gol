@@ -67,6 +67,5 @@ void render_pattern_static(Pattern *pattern, SDL_Rect canvas, SDL_Color fgcol, S
     }
     renderer_set_color(bordercol);
     SDL_RenderDrawRect(renderer, &canvas);
-
     renderer_set_color(cached);
 }
